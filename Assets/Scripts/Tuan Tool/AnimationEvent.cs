@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+namespace TuanTool
+{
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Animator))]
     public class AnimationEvent : MonoBehaviour
@@ -61,3 +63,4 @@ using UnityEngine.Events;
             public UnityEvent OnCall = new UnityEvent();
         }
     }
+}

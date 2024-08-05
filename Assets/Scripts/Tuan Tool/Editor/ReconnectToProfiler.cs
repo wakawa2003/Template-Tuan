@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace BeachHeat
+namespace TuanTool
 {
     public class ReconnectToProfiler : MonoBehaviour
     {

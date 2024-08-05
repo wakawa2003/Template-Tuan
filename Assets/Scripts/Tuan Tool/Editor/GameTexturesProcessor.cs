@@ -8,7 +8,7 @@ using UnityEditor;
 using UnityEngine;
 
 
-namespace JuicyWarrior
+namespace TuanTool
 {
     public class GameTexturesProcessor : AssetPostprocessor
     {

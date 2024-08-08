@@ -1,4 +1,5 @@
-#if UNITY_EDITOR
+//#if UNITY_EDITOR
+using Newtonsoft.Json;
 using Sirenix.Utilities.Editor;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,11 +9,34 @@ using UnityEditor;
 using UnityEngine;
 
 
-namespace TuanTool
+namespace Tuan.UtilitiesEditor
 {
-    public class GameTexturesProcessor : AssetPostprocessor
+    public class GameAssetProcessor : AssetPostprocessor
     {
         bool isDirty = false;
+        private void OnPostprocessModel(GameObject gameObject)
+        {
+            isDirty = false;
+            if (gameObject.name.StartsWith("~") || assetPath.Contains("common-lib"))//bo qua textures bat dau = "~"
+                //if (texture.name.StartsWith("~"))//bo qua textures bat dau = "~"
+                return;
+            var a = assetImporter as ModelImporter;
+            if (a.meshCompression != ModelImporterMeshCompression.High)
+            {
+                a.meshCompression = ModelImporterMeshCompression.High;
+                isDirty = true;
+            }
+            if (isDirty)
+                EditorCoroutineUtility.StartCoroutine(IESave(), a);
+            IEnumerator IESave()
+            {
+                yield return null;
+                Debug.Log($"import model: {a.assetPath}");
+                assetImporter.SaveAndReimport();
+                AssetDatabase.SaveAssetIfDirty(AssetDatabase.GUIDFromAssetPath(assetPath));
+            }
+
+        }
         private void OnPostprocessTexture(Texture2D texture)
         {
             if (texture.name.StartsWith("~") || assetPath.Contains("common-lib"))//bo qua textures bat dau = "~"
@@ -77,8 +101,7 @@ namespace TuanTool
             IEnumerator IESave()
             {
                 yield return null;
-                Debug.Log($"import ne");
-                Debug.Log($"version :{GetVersion()}");
+                Debug.Log($"import texture: {a.assetPath}");
                 assetImporter.SaveAndReimport();
                 AssetDatabase.SaveAssetIfDirty(AssetDatabase.GUIDFromAssetPath(assetPath));
                 //isDirty = false;
@@ -100,4 +123,4 @@ namespace TuanTool
 
     }
 }
-#endif
+//#endif

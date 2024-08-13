@@ -1,8 +1,5 @@
 //#if UNITY_EDITOR
-using Newtonsoft.Json;
-using Sirenix.Utilities.Editor;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;

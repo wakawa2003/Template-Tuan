@@ -12,6 +12,7 @@ namespace TuanTool
         private class PoolSlot
         {
             public bool AutoInit = true;
+            public bool ReuseInactiveObject = true;
             public string Name;
             [OnValueChanged(nameof(OnObjectChange))]
             public GameObject Object;
@@ -111,16 +112,19 @@ namespace TuanTool
             }
             var poolSLot = _poolDict[name];
             //GameObject gameObject1 = _poolDict[name]._poolQueue.Peek();
-            GameObject gameObject1 = getInActiveObject(poolSLot);
+            GameObject gameObject1 = getNextObj(poolSLot);
+
             if (gameObject1 == null)
             {
                 gameObject1 = AddNewGameObjectForSlot(_poolDict[name]);
             }
+
             if (gameObject1.activeSelf)
-            {
-                gameObject1 = AddNewGameObjectForSlot(_poolDict[name]);
-                Debug.LogError($"Obj {gameObject1.name} is in use!");
-            }
+                if (!poolSLot.ReuseInactiveObject)
+                {
+                    gameObject1 = AddNewGameObjectForSlot(_poolDict[name]);
+                    //Debug.LogError($"Obj {gameObject1.name} is in use!");
+                }
 
 
             gameObject1.SetActive(true);
@@ -132,15 +136,14 @@ namespace TuanTool
 
             return gameObject1;
 
-            static GameObject getInActiveObject(PoolSlot poolSLot)
+            static GameObject getNextObj(PoolSlot poolSLot)
             {
                 for (int i = 0; i < poolSLot._poolQueue.Count; i++)
                 {
                     poolSLot.hintIndex += 1;
                     poolSLot.hintIndex = poolSLot.hintIndex % (poolSLot._poolQueue.Count);
                     var obj = poolSLot._poolQueue[poolSLot.hintIndex];
-                    if (!obj.activeSelf)
-                        return obj;
+                    return obj;
                 }
 
                 return null;

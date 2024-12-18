@@ -1,0 +1,646 @@
+// Made with Amplify Shader Editor v1.9.2.2
+// Available at the Unity Asset Store - http://u3d.as/y3X 
+Shader "Particle Bloom URP"
+{
+	Properties
+	{
+		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
+		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
+		[HDR]_Color0("Color 0", Color) = (1,1,1,0)
+		_BaseMap("BaseMap", 2D) = "white" {}
+		_Fade("Fade", Float) = 2
+		[HideInInspector] _texcoord( "", 2D ) = "white" {}
+
+		[HideInInspector][NoScaleOffset] unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
+        [HideInInspector][NoScaleOffset] unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
+        [HideInInspector][NoScaleOffset] unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
+	}
+
+	SubShader
+	{
+		LOD 0
+
+		
+
+		Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Transparent" "Queue"="Transparent" }
+
+		Cull Off
+		HLSLINCLUDE
+		#pragma target 2.0
+		#pragma prefer_hlslcc gles
+		// ensure rendering platforms toggle list is visible
+
+		#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+		#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
+		ENDHLSL
+
+		
+		Pass
+		{
+			Name "Sprite Unlit"
+			Tags { "LightMode"="Universal2D" }
+
+			Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
+			ZTest LEqual
+			ZWrite Off
+			Offset 0 , 0
+			ColorMask RGBA
+			
+
+			HLSLPROGRAM
+
+			#define ASE_SRP_VERSION 140011
+			#define REQUIRE_DEPTH_TEXTURE 1
+
+
+			#pragma vertex vert
+			#pragma fragment frag
+
+			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define SHADERPASS SHADERPASS_SPRITEUNLIT
+
+			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
+
+			#include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/SurfaceData2D.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Debug/Debugging2D.hlsl"
+
+			#define ASE_NEEDS_FRAG_COLOR
+
+
+			sampler2D _BaseMap;
+			uniform float4 _CameraDepthTexture_TexelSize;
+			CBUFFER_START( UnityPerMaterial )
+			float4 _BaseMap_ST;
+			float4 _Color0;
+			float _Fade;
+			CBUFFER_END
+
+
+			struct VertexInput
+			{
+				float4 positionOS : POSITION;
+				float3 normal : NORMAL;
+				float4 tangent : TANGENT;
+				float4 uv0 : TEXCOORD0;
+				float4 color : COLOR;
+				
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+
+			struct VertexOutput
+			{
+				float4 positionCS : SV_POSITION;
+				float4 texCoord0 : TEXCOORD0;
+				float4 color : TEXCOORD1;
+				float3 positionWS : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+				UNITY_VERTEX_OUTPUT_STEREO
+			};
+
+			#if ETC1_EXTERNAL_ALPHA
+				TEXTURE2D( _AlphaTex ); SAMPLER( sampler_AlphaTex );
+				float _EnableAlphaTexture;
+			#endif
+
+			float4 _RendererColor;
+
+			
+			VertexOutput vert( VertexInput v  )
+			{
+				VertexOutput o = (VertexOutput)0;
+				UNITY_SETUP_INSTANCE_ID( v );
+				UNITY_TRANSFER_INSTANCE_ID( v, o );
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
+
+				float4 ase_clipPos = TransformObjectToHClip((v.positionOS).xyz);
+				float4 screenPos = ComputeScreenPos(ase_clipPos);
+				o.ase_texcoord3 = screenPos;
+				
+				#ifdef ASE_ABSOLUTE_VERTEX_POS
+					float3 defaultVertexValue = v.positionOS.xyz;
+				#else
+					float3 defaultVertexValue = float3( 0, 0, 0 );
+				#endif
+				float3 vertexValue = defaultVertexValue;
+				#ifdef ASE_ABSOLUTE_VERTEX_POS
+					v.positionOS.xyz = vertexValue;
+				#else
+					v.positionOS.xyz += vertexValue;
+				#endif
+				v.normal = v.normal;
+				v.tangent.xyz = v.tangent.xyz;
+
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
+
+				o.texCoord0 = v.uv0;
+				o.color = v.color;
+				o.positionCS = vertexInput.positionCS;
+				o.positionWS = vertexInput.positionWS;
+
+				return o;
+			}
+
+			half4 frag( VertexOutput IN  ) : SV_Target
+			{
+				UNITY_SETUP_INSTANCE_ID( IN );
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
+
+				float2 uv_BaseMap = IN.texCoord0.xy * _BaseMap_ST.xy + _BaseMap_ST.zw;
+				float4 tex2DNode9 = tex2D( _BaseMap, uv_BaseMap );
+				float4 screenPos = IN.ase_texcoord3;
+				float4 ase_screenPosNorm = screenPos / screenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float screenDepth1_g13 = LinearEyeDepth(SHADERGRAPH_SAMPLE_SCENE_DEPTH( ase_screenPosNorm.xy ),_ZBufferParams);
+				float distanceDepth1_g13 = abs( ( screenDepth1_g13 - LinearEyeDepth( ase_screenPosNorm.z,_ZBufferParams ) ) / ( _Fade ) );
+				float ifLocalVar6_g13 = 0;
+				UNITY_BRANCH 
+				if( unity_OrthoParams.w == 0.0 )
+				ifLocalVar6_g13 = distanceDepth1_g13;
+				else
+				ifLocalVar6_g13 = 1.0;
+				float temp_output_17_0 = saturate( ifLocalVar6_g13 );
+				
+				float4 Color = ( tex2DNode9 * IN.color * _Color0 * temp_output_17_0 );
+
+				#if ETC1_EXTERNAL_ALPHA
+					float4 alpha = SAMPLE_TEXTURE2D( _AlphaTex, sampler_AlphaTex, IN.texCoord0.xy );
+					Color.a = lerp( Color.a, alpha.r, _EnableAlphaTexture );
+				#endif
+
+				#if defined(DEBUG_DISPLAY)
+				SurfaceData2D surfaceData;
+				InitializeSurfaceData(Color.rgb, Color.a, surfaceData);
+				InputData2D inputData;
+				InitializeInputData(IN.positionWS.xy, half2(IN.texCoord0.xy), inputData);
+				half4 debugColor = 0;
+
+				SETUP_DEBUG_DATA_2D(inputData, IN.positionWS);
+
+				if (CanDebugOverrideOutputColor(surfaceData, inputData, debugColor))
+				{
+					return debugColor;
+				}
+				#endif
+
+				Color *= IN.color * _RendererColor;
+				return Color;
+			}
+
+			ENDHLSL
+		}
+		
+		Pass
+		{
+			
+			Name "Sprite Unlit Forward"
+            Tags { "LightMode"="UniversalForward" }
+
+			Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
+			ZTest LEqual
+			ZWrite Off
+			Offset 0 , 0
+			ColorMask RGBA
+			
+
+			HLSLPROGRAM
+
+			#define ASE_SRP_VERSION 140011
+			#define REQUIRE_DEPTH_TEXTURE 1
+
+
+			#pragma vertex vert
+			#pragma fragment frag
+
+			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define SHADERPASS SHADERPASS_SPRITEFORWARD
+
+			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
+
+			#include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/SurfaceData2D.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Debug/Debugging2D.hlsl"
+
+			#define ASE_NEEDS_FRAG_COLOR
+
+
+			sampler2D _BaseMap;
+			uniform float4 _CameraDepthTexture_TexelSize;
+			CBUFFER_START( UnityPerMaterial )
+			float4 _BaseMap_ST;
+			float4 _Color0;
+			float _Fade;
+			CBUFFER_END
+
+
+			struct VertexInput
+			{
+				float4 positionOS : POSITION;
+				float3 normal : NORMAL;
+				float4 tangent : TANGENT;
+				float4 uv0 : TEXCOORD0;
+				float4 color : COLOR;
+				
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+
+			struct VertexOutput
+			{
+				float4 positionCS : SV_POSITION;
+				float4 texCoord0 : TEXCOORD0;
+				float4 color : TEXCOORD1;
+				float3 positionWS : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+				UNITY_VERTEX_OUTPUT_STEREO
+			};
+
+			#if ETC1_EXTERNAL_ALPHA
+				TEXTURE2D( _AlphaTex ); SAMPLER( sampler_AlphaTex );
+				float _EnableAlphaTexture;
+			#endif
+
+			float4 _RendererColor;
+
+			
+			VertexOutput vert( VertexInput v  )
+			{
+				VertexOutput o = (VertexOutput)0;
+				UNITY_SETUP_INSTANCE_ID( v );
+				UNITY_TRANSFER_INSTANCE_ID( v, o );
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
+
+				float4 ase_clipPos = TransformObjectToHClip((v.positionOS).xyz);
+				float4 screenPos = ComputeScreenPos(ase_clipPos);
+				o.ase_texcoord3 = screenPos;
+				
+				#ifdef ASE_ABSOLUTE_VERTEX_POS
+					float3 defaultVertexValue = v.positionOS.xyz;
+				#else
+					float3 defaultVertexValue = float3( 0, 0, 0 );
+				#endif
+				float3 vertexValue = defaultVertexValue;
+				#ifdef ASE_ABSOLUTE_VERTEX_POS
+					v.positionOS.xyz = vertexValue;
+				#else
+					v.positionOS.xyz += vertexValue;
+				#endif
+				v.normal = v.normal;
+				v.tangent.xyz = v.tangent.xyz;
+
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
+
+				o.texCoord0 = v.uv0;
+				o.color = v.color;
+				o.positionCS = vertexInput.positionCS;
+				o.positionWS = vertexInput.positionWS;
+
+				return o;
+			}
+
+			half4 frag( VertexOutput IN  ) : SV_Target
+			{
+				UNITY_SETUP_INSTANCE_ID( IN );
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
+
+				float2 uv_BaseMap = IN.texCoord0.xy * _BaseMap_ST.xy + _BaseMap_ST.zw;
+				float4 tex2DNode9 = tex2D( _BaseMap, uv_BaseMap );
+				float4 screenPos = IN.ase_texcoord3;
+				float4 ase_screenPosNorm = screenPos / screenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float screenDepth1_g13 = LinearEyeDepth(SHADERGRAPH_SAMPLE_SCENE_DEPTH( ase_screenPosNorm.xy ),_ZBufferParams);
+				float distanceDepth1_g13 = abs( ( screenDepth1_g13 - LinearEyeDepth( ase_screenPosNorm.z,_ZBufferParams ) ) / ( _Fade ) );
+				float ifLocalVar6_g13 = 0;
+				UNITY_BRANCH 
+				if( unity_OrthoParams.w == 0.0 )
+				ifLocalVar6_g13 = distanceDepth1_g13;
+				else
+				ifLocalVar6_g13 = 1.0;
+				float temp_output_17_0 = saturate( ifLocalVar6_g13 );
+				
+				float4 Color = ( tex2DNode9 * IN.color * _Color0 * temp_output_17_0 );
+
+				#if ETC1_EXTERNAL_ALPHA
+					float4 alpha = SAMPLE_TEXTURE2D( _AlphaTex, sampler_AlphaTex, IN.texCoord0.xy );
+					Color.a = lerp( Color.a, alpha.r, _EnableAlphaTexture );
+				#endif
+
+
+				#if defined(DEBUG_DISPLAY)
+				SurfaceData2D surfaceData;
+				InitializeSurfaceData(Color.rgb, Color.a, surfaceData);
+				InputData2D inputData;
+				InitializeInputData(IN.positionWS.xy, half2(IN.texCoord0.xy), inputData);
+				half4 debugColor = 0;
+
+				SETUP_DEBUG_DATA_2D(inputData, IN.positionWS);
+
+				if (CanDebugOverrideOutputColor(surfaceData, inputData, debugColor))
+				{
+					return debugColor;
+				}
+				#endif
+
+				Color *= IN.color * _RendererColor;
+				return Color;
+			}
+
+			ENDHLSL
+		}
+		
+        Pass
+        {
+			
+            Name "SceneSelectionPass"
+            Tags { "LightMode"="SceneSelectionPass" }
+
+            Cull Off
+
+            HLSLPROGRAM
+
+			#define ASE_SRP_VERSION 140011
+			#define REQUIRE_DEPTH_TEXTURE 1
+
+
+			#pragma vertex vert
+			#pragma fragment frag
+
+            #define _SURFACE_TYPE_TRANSPARENT 1
+            #define ATTRIBUTES_NEED_NORMAL
+            #define ATTRIBUTES_NEED_TANGENT
+            #define FEATURES_GRAPH_VERTEX
+            #define SHADERPASS SHADERPASS_DEPTHONLY
+			#define SCENESELECTIONPASS 1
+
+
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
+
+			
+
+			sampler2D _BaseMap;
+			uniform float4 _CameraDepthTexture_TexelSize;
+			CBUFFER_START( UnityPerMaterial )
+			float4 _BaseMap_ST;
+			float4 _Color0;
+			float _Fade;
+			CBUFFER_END
+
+
+            struct VertexInput
+			{
+				float3 positionOS : POSITION;
+				float3 normal : NORMAL;
+				float4 tangent : TANGENT;
+				float4 ase_texcoord : TEXCOORD0;
+				float4 ase_color : COLOR;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+
+			struct VertexOutput
+			{
+				float4 positionCS : SV_POSITION;
+				float4 ase_texcoord : TEXCOORD0;
+				float4 ase_color : COLOR;
+				float4 ase_texcoord1 : TEXCOORD1;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+
+
+            int _ObjectId;
+            int _PassValue;
+
+			
+			VertexOutput vert(VertexInput v )
+			{
+				VertexOutput o = (VertexOutput)0;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
+
+				float4 ase_clipPos = TransformObjectToHClip((v.positionOS).xyz);
+				float4 screenPos = ComputeScreenPos(ase_clipPos);
+				o.ase_texcoord1 = screenPos;
+				
+				o.ase_texcoord.xy = v.ase_texcoord.xy;
+				o.ase_color = v.ase_color;
+				
+				//setting value to unused interpolator channels and avoid initialization warnings
+				o.ase_texcoord.zw = 0;
+				#ifdef ASE_ABSOLUTE_VERTEX_POS
+					float3 defaultVertexValue = v.positionOS.xyz;
+				#else
+					float3 defaultVertexValue = float3(0, 0, 0);
+				#endif
+				float3 vertexValue = defaultVertexValue;
+				#ifdef ASE_ABSOLUTE_VERTEX_POS
+					v.positionOS.xyz = vertexValue;
+				#else
+					v.positionOS.xyz += vertexValue;
+				#endif
+
+				VertexPositionInputs vertexInput = GetVertexPositionInputs(v.positionOS.xyz);
+				float3 positionWS = TransformObjectToWorld(v.positionOS);
+				o.positionCS = TransformWorldToHClip(positionWS);
+
+				return o;
+			}
+
+			half4 frag(VertexOutput IN ) : SV_TARGET
+			{
+				float2 uv_BaseMap = IN.ase_texcoord.xy * _BaseMap_ST.xy + _BaseMap_ST.zw;
+				float4 tex2DNode9 = tex2D( _BaseMap, uv_BaseMap );
+				float4 screenPos = IN.ase_texcoord1;
+				float4 ase_screenPosNorm = screenPos / screenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float screenDepth1_g13 = LinearEyeDepth(SHADERGRAPH_SAMPLE_SCENE_DEPTH( ase_screenPosNorm.xy ),_ZBufferParams);
+				float distanceDepth1_g13 = abs( ( screenDepth1_g13 - LinearEyeDepth( ase_screenPosNorm.z,_ZBufferParams ) ) / ( _Fade ) );
+				float ifLocalVar6_g13 = 0;
+				UNITY_BRANCH 
+				if( unity_OrthoParams.w == 0.0 )
+				ifLocalVar6_g13 = distanceDepth1_g13;
+				else
+				ifLocalVar6_g13 = 1.0;
+				float temp_output_17_0 = saturate( ifLocalVar6_g13 );
+				
+				float4 Color = ( tex2DNode9 * IN.ase_color * _Color0 * temp_output_17_0 );
+
+				half4 outColor = half4(_ObjectId, _PassValue, 1.0, 1.0);
+				return outColor;
+			}
+
+            ENDHLSL
+        }
+
+		
+        Pass
+        {
+			
+            Name "ScenePickingPass"
+            Tags { "LightMode"="Picking" }
+
+            Cull Off
+
+            HLSLPROGRAM
+
+			#define ASE_SRP_VERSION 140011
+			#define REQUIRE_DEPTH_TEXTURE 1
+
+
+			#pragma vertex vert
+			#pragma fragment frag
+
+            #define _SURFACE_TYPE_TRANSPARENT 1
+            #define ATTRIBUTES_NEED_NORMAL
+            #define ATTRIBUTES_NEED_TANGENT
+            #define FEATURES_GRAPH_VERTEX
+            #define SHADERPASS SHADERPASS_DEPTHONLY
+			#define SCENEPICKINGPASS 1
+
+
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
+
+        	
+
+			sampler2D _BaseMap;
+			uniform float4 _CameraDepthTexture_TexelSize;
+			CBUFFER_START( UnityPerMaterial )
+			float4 _BaseMap_ST;
+			float4 _Color0;
+			float _Fade;
+			CBUFFER_END
+
+
+            struct VertexInput
+			{
+				float3 positionOS : POSITION;
+				float3 normal : NORMAL;
+				float4 tangent : TANGENT;
+				float4 ase_texcoord : TEXCOORD0;
+				float4 ase_color : COLOR;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+
+			struct VertexOutput
+			{
+				float4 positionCS : SV_POSITION;
+				float4 ase_texcoord : TEXCOORD0;
+				float4 ase_color : COLOR;
+				float4 ase_texcoord1 : TEXCOORD1;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+
+            float4 _SelectionID;
+
+			
+			VertexOutput vert(VertexInput v  )
+			{
+				VertexOutput o = (VertexOutput)0;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
+
+				float4 ase_clipPos = TransformObjectToHClip((v.positionOS).xyz);
+				float4 screenPos = ComputeScreenPos(ase_clipPos);
+				o.ase_texcoord1 = screenPos;
+				
+				o.ase_texcoord.xy = v.ase_texcoord.xy;
+				o.ase_color = v.ase_color;
+				
+				//setting value to unused interpolator channels and avoid initialization warnings
+				o.ase_texcoord.zw = 0;
+				#ifdef ASE_ABSOLUTE_VERTEX_POS
+					float3 defaultVertexValue = v.positionOS.xyz;
+				#else
+					float3 defaultVertexValue = float3(0, 0, 0);
+				#endif
+				float3 vertexValue = defaultVertexValue;
+				#ifdef ASE_ABSOLUTE_VERTEX_POS
+					v.positionOS.xyz = vertexValue;
+				#else
+					v.positionOS.xyz += vertexValue;
+				#endif
+
+				VertexPositionInputs vertexInput = GetVertexPositionInputs(v.positionOS.xyz);
+				float3 positionWS = TransformObjectToWorld(v.positionOS);
+				o.positionCS = TransformWorldToHClip(positionWS);
+
+				return o;
+			}
+
+			half4 frag(VertexOutput IN ) : SV_TARGET
+			{
+				float2 uv_BaseMap = IN.ase_texcoord.xy * _BaseMap_ST.xy + _BaseMap_ST.zw;
+				float4 tex2DNode9 = tex2D( _BaseMap, uv_BaseMap );
+				float4 screenPos = IN.ase_texcoord1;
+				float4 ase_screenPosNorm = screenPos / screenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float screenDepth1_g13 = LinearEyeDepth(SHADERGRAPH_SAMPLE_SCENE_DEPTH( ase_screenPosNorm.xy ),_ZBufferParams);
+				float distanceDepth1_g13 = abs( ( screenDepth1_g13 - LinearEyeDepth( ase_screenPosNorm.z,_ZBufferParams ) ) / ( _Fade ) );
+				float ifLocalVar6_g13 = 0;
+				UNITY_BRANCH 
+				if( unity_OrthoParams.w == 0.0 )
+				ifLocalVar6_g13 = distanceDepth1_g13;
+				else
+				ifLocalVar6_g13 = 1.0;
+				float temp_output_17_0 = saturate( ifLocalVar6_g13 );
+				
+				float4 Color = ( tex2DNode9 * IN.ase_color * _Color0 * temp_output_17_0 );
+				half4 outColor = _SelectionID;
+				return outColor;
+			}
+
+            ENDHLSL
+        }
+		
+	}
+	CustomEditor "ASEMaterialInspector"
+	Fallback "Hidden/InternalErrorShader"
+	
+}
+/*ASEBEGIN
+Version=19202
+Node;AmplifyShaderEditor.SamplerNode;9;-464.5308,-376.2385;Inherit;True;Property;_BaseMap;BaseMap;1;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.VertexColorNode;10;-378.5032,-149.3463;Inherit;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.ColorNode;6;-472.7823,35.26758;Inherit;False;Property;_Color0;Color 0;0;1;[HDR];Create;True;0;0;0;False;0;False;1,1,1,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;7;-11.0055,-216.0147;Inherit;False;4;4;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;COLOR;0,0,0,0;False;3;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.FunctionNode;17;-314.2691,298.5553;Inherit;False;Tuan Depth Fade;-1;;13;be4e0e5049c9ba145b5fc0d2cb3a53cd;0;3;9;FLOAT;0;False;7;FLOAT;1;False;8;FLOAT3;0,0,0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;18;-543.9634,313.0538;Inherit;False;Property;_Fade;Fade;2;0;Create;True;0;0;0;False;0;False;2;1;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;20;177,-1;Float;False;False;-1;2;ASEMaterialInspector;0;1;New Amplify Shader;cf964e524c8e69742b1d21fbe2ebcc4a;True;Sprite Unlit Forward;0;1;Sprite Unlit Forward;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;12;all;0;False;True;2;5;False;;10;False;;3;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;21;177,-1;Float;False;False;-1;2;ASEMaterialInspector;0;1;New Amplify Shader;cf964e524c8e69742b1d21fbe2ebcc4a;True;SceneSelectionPass;0;2;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;22;177,-1;Float;False;False;-1;2;ASEMaterialInspector;0;1;New Amplify Shader;cf964e524c8e69742b1d21fbe2ebcc4a;True;ScenePickingPass;0;3;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;11;-39.50317,26.65369;Inherit;False;3;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;19;177,-1;Float;False;True;-1;2;ASEMaterialInspector;0;15;Particle Bloom URP;cf964e524c8e69742b1d21fbe2ebcc4a;True;Sprite Unlit;0;0;Sprite Unlit;4;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;12;all;0;False;True;2;5;False;;10;False;;3;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=Universal2D;False;False;0;Hidden/InternalErrorShader;0;0;Standard;3;Vertex Position;1;0;Debug Display;0;0;External Alpha;0;0;0;4;True;True;True;True;False;;False;0
+WireConnection;7;0;9;0
+WireConnection;7;1;10;0
+WireConnection;7;2;6;0
+WireConnection;7;3;17;0
+WireConnection;17;7;18;0
+WireConnection;11;0;9;4
+WireConnection;11;1;10;4
+WireConnection;11;2;17;0
+WireConnection;19;1;7;0
+ASEEND*/
+//CHKSM=2190C00D80049E4DA640F89F923A7E920EBF40B3

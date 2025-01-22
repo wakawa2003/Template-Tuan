@@ -371,5 +371,45 @@ namespace TuanTool
             return System.Math.Sign(t);
         }
 
+        /// <summary>
+        /// Sum of all weights is unlimited.
+        /// </summary>
+        /// <param name="weights"></param>
+        /// <returns></returns>
+        public static int GetRandomWeightedIndex(List<float> weights)
+        {
+            if (weights == null || weights.Count == 0) return -1;
+
+            float w;
+            float t = 0;
+            int i;
+            for (i = 0; i < weights.Count; i++)
+            {
+                w = weights[i];
+
+                if (float.IsPositiveInfinity(w))
+                {
+                    return i;
+                }
+                else if (w >= 0f && !float.IsNaN(w))
+                {
+                    t += weights[i];
+                }
+            }
+
+            float r = UnityEngine.Random.value;
+            float s = 0f;
+
+            for (i = 0; i < weights.Count; i++)
+            {
+                w = weights[i];
+                if (float.IsNaN(w) || w <= 0f) continue;
+
+                s += w / t;
+                if (s >= r) return i;
+            }
+
+            return -1;
+        }
     }
 }

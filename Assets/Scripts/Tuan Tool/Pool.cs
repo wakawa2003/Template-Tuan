@@ -9,7 +9,7 @@ namespace TuanTool
     {
 
         [System.Serializable]
-        private class PoolSlot
+        public class PoolSlot
         {
             public bool AutoInit = true;
             public bool ReuseInactiveObject = true;
@@ -36,15 +36,19 @@ namespace TuanTool
         [SerializeField] private Dictionary<string, PoolSlot> _poolDict = new Dictionary<string, PoolSlot>();
 
         bool isInit = false;
+
+        public List<PoolSlot> PoolSlots { get => _poolSlots; set => _poolSlots = value; }
+        public Dictionary<string, PoolSlot> PoolDict { get => _poolDict; set => _poolDict = value; }
+
         public void Init()
         {
             if (!isInit)
             {
-                for (int i = 0; i < _poolSlots.Count; i++)
+                for (int i = 0; i < PoolSlots.Count; i++)
                 {
-                    for (int j = 0; j < _poolSlots[i].Amount; j++)
+                    for (int j = 0; j < PoolSlots[i].Amount; j++)
                     {
-                        var poolSlot = _poolSlots[i];
+                        var poolSlot = PoolSlots[i];
                         if (poolSlot.AutoInit)
                             AddNewGameObjectForSlot(poolSlot);
                         else
@@ -56,7 +60,7 @@ namespace TuanTool
                             }
                         }
                     }
-                    _poolDict.Add(_poolSlots[i].Name, _poolSlots[i]);
+                    PoolDict.Add(PoolSlots[i].Name, PoolSlots[i]);
                 }
                 isInit = true;
             }
@@ -105,24 +109,24 @@ namespace TuanTool
         public GameObject Instantiate(string name)
         {
             Init();
-            if (!_poolDict.ContainsKey(name))
+            if (!PoolDict.ContainsKey(name))
             {
                 Debug.LogError("Pool ko co Key: " + name);
                 return null;
             }
-            var poolSLot = _poolDict[name];
+            var poolSLot = PoolDict[name];
             //GameObject gameObject1 = _poolDict[name]._poolQueue.Peek();
             GameObject gameObject1 = getNextObj(poolSLot);
 
             if (gameObject1 == null)
             {
-                gameObject1 = AddNewGameObjectForSlot(_poolDict[name]);
+                gameObject1 = AddNewGameObjectForSlot(PoolDict[name]);
             }
 
             if (gameObject1.activeSelf)
                 if (!poolSLot.ReuseInactiveObject)
                 {
-                    gameObject1 = AddNewGameObjectForSlot(_poolDict[name]);
+                    gameObject1 = AddNewGameObjectForSlot(PoolDict[name]);
                     //Debug.LogError($"Obj {gameObject1.name} is in use!");
                 }
 

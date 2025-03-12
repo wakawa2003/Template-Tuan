@@ -357,6 +357,10 @@ namespace TuanTool
             }
             return monoBehaviour.StartCoroutine(IERunAnimator());
         }
+        public static AnimationCurve AnimationCurve_Linear01()
+        {
+            return AnimationCurve.Linear(0.0f, 0.0f, 1, 1);
+        }
 
 
         /// <summary>

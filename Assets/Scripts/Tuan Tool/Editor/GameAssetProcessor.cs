@@ -12,7 +12,7 @@ namespace Tuan.UtilitiesEditor
 {
     public class GameAssetProcessor : AssetPostprocessor
     {
-        public static List<Texture> processingTextures = new List<Texture>();
+        public static List<string> processingTextures = new List<string>();
         bool isDirty = false;
         private void OnPostprocessModel(GameObject gameObject)
         {
@@ -38,37 +38,25 @@ namespace Tuan.UtilitiesEditor
             }
 
         }
+
         [MenuItem("Tools/Clean Data Reimport Textures")]
         static void ReimportTextures()
         {
             processingTextures.Clear();
             Debug.Log("Bây giờ có thể Reimport textures được rồi!!!!!");
 
-            //// Get all texture assets in the project
-            //string[] texturePaths = AssetDatabase.FindAssets("t:Texture", new string[] { "Assets" });
-            //Debug.Log($"textures count: {texturePaths.Count()}");
-            //for (int i = 0; i < texturePaths.Length; i++)
-            //{
-            //    Debug.Log($"sovle {i}");
-            //    string path = AssetDatabase.GUIDToAssetPath(texturePaths[i]);
-            //    TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
-            //    SolveTextures(importer);
-            //}
-
-            //Debug.Log("All textures have been re-imported with proper compression.");
         }
+
         private void OnPostprocessTexture(Texture2D texture)
         {
-            SolveTextures(assetImporter);
 
-        }
-
-        private static void SolveTextures(AssetImporter assetImporter)
-        {
+           //return;
             //Debug.Log($"sovle texxxx");
             var a = assetImporter as TextureImporter;
-            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(assetImporter.assetPath);
-            if (processingTextures.Contains(texture))
+
+            //Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(assetImporter.assetPath);
+           var path = assetImporter.assetPath;
+            if (processingTextures.Contains(path))
                 return;
             //return;
             //if (texture.name.StartsWith("~") || a.assetPath.Contains("common-lib"))//bo qua textures bat dau = "~"
@@ -83,25 +71,25 @@ namespace Tuan.UtilitiesEditor
             //    //    if (!path.Any(_ => _.Contains("Editor")) && !path.Contains("GUI"))
             //    Debug.LogError($"Texture {a.assetPath} is not Power Of Two!");
             //    // Cấu hình riêng cho Android
-            //    //a.SetPlatformTextureSettings(new TextureImporterPlatformSettings
-            //    //{
-            //    //    name = "Android",               // Nền tảng
-            //    //    maxTextureSize = a.maxTextureSize,
-            //    //    overridden = false,              // Sử dụng cài đặt riêng
-            //    //    format = TextureImporterFormat.Automatic, // Định dạng nén
-            //    //    compressionQuality = 100
-            //    //});
+            //    a.SetPlatformTextureSettings(new TextureImporterPlatformSettings
+            //    {
+            //        name = "Android",               // Nền tảng
+            //        maxTextureSize = a.maxTextureSize,
+            //        overridden = false,              // Sử dụng cài đặt riêng
+            //        format = TextureImporterFormat.Automatic, // Định dạng nén
+            //        compressionQuality = 100
+            //    });
             //}
             //else
             //{
-            //    //a.SetPlatformTextureSettings(new TextureImporterPlatformSettings
-            //    //{
-            //    //    maxTextureSize = a.maxTextureSize,
-            //    //    name = "Android",               // Nền tảng
-            //    //    overridden = true,              // Sử dụng cài đặt riêng
-            //    //    format = TextureImporterFormat.ASTC_12x12, // Định dạng nén mhỏ nhất cho hình ảnh pot.
-            //    //    compressionQuality = 100
-            //    //});
+            //    a.SetPlatformTextureSettings(new TextureImporterPlatformSettings
+            //    {
+            //        maxTextureSize = a.maxTextureSize,
+            //        name = "Android",               // Nền tảng
+            //        overridden = true,              // Sử dụng cài đặt riêng
+            //        format = TextureImporterFormat.DXT5Crunched, // Định dạng nén mhỏ nhất cho hình ảnh pot.
+            //        compressionQuality = 100
+            //    });
             //}
             //a.SetPlatformTextureSettings(new TextureImporterPlatformSettings
             //{
@@ -153,8 +141,8 @@ namespace Tuan.UtilitiesEditor
             }
 
             Debug.Log($"import texture: {a.assetPath}");
-            if (!processingTextures.Contains(texture))
-                processingTextures.Add(texture);
+            if (!processingTextures.Contains(path))
+                processingTextures.Add(path);
 
             EditorCoroutineUtility.StartCoroutineOwnerless(IEImport());
 
@@ -165,8 +153,8 @@ namespace Tuan.UtilitiesEditor
                 assetImporter.SaveAndReimport();
                 for (int i = 0; i < 10; i++)
                     yield return null;
-                if (processingTextures.Contains(texture))
-                    processingTextures.Remove(texture);
+                if (processingTextures.Contains(path))
+                    processingTextures.Remove(path);
             }
         }
 

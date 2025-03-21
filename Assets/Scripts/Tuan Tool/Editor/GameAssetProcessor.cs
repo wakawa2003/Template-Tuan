@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEditor.Presets;
@@ -12,7 +13,6 @@ namespace Tuan.UtilitiesEditor
 {
     public class GameAssetProcessor : AssetPostprocessor
     {
-        public static List<string> processingTextures = new List<string>();
         bool isDirty = false;
         private void OnPostprocessModel(GameObject gameObject)
         {
@@ -39,25 +39,80 @@ namespace Tuan.UtilitiesEditor
 
         }
 
-        [MenuItem("Tools/Clean Data Reimport Textures")]
-        static void ReimportTextures()
+        [MenuItem("Tools/Reimport Textures")]
+        static async void ReimportTextures()
         {
-            processingTextures.Clear();
-            Debug.Log("Bây giờ có thể Reimport textures được rồi!!!!!");
+            var startTime = System.DateTime.Now;
+            AssetDatabase.StartAssetEditing();
+            int countCompleted = 0;
+            try
+            {
+                // Lấy đối tượng đang được chọn trong Project
+                List<Task> listTask = new List<Task>();
+                Object[] selectedObjects = Selection.objects;
+                if (selectedObjects.Length > 0)
+                {
+                    foreach (Object obj in selectedObjects)
+                    {
+                        // Lấy đường dẫn tới asset
+                        string path = AssetDatabase.GetAssetPath(obj);
 
+                        // Kiểm tra xem asset có phải là Texture không
+                        TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
+                        if (textureImporter != null)
+                        {
+                            Debug.Log($"Texture Importer settings for {obj.name}:");
+                            Debug.Log($"Path: {path}");
+                            Debug.Log($"Texture Type: {textureImporter.textureType}");
+                            Debug.Log($"Wrap Mode: {textureImporter.wrapMode}");
+                            Debug.Log($"Filter Mode: {textureImporter.filterMode}");
+                            var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                            listTask.Add(_exe(texture, textureImporter));
+
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"The asset '{obj.name}' at path '{path}' is not a texture!");
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("No assets are selected!");
+                }
+                await Task.WhenAll(listTask);
+
+                async Task _exe(Texture2D texture, AssetImporter assetImporter)
+                {
+                    await Execute(texture, assetImporter);
+                    countCompleted++;
+
+                }
+
+            }
+            finally
+            {
+
+                AssetDatabase.StopAssetEditing();
+                Debug.Log($"Hoàn thành import: {(System.DateTime.Now - startTime).TotalSeconds}");
+            }
         }
 
         private void OnPostprocessTexture(Texture2D texture)
         {
+            //Execute(texture, assetImporter);
 
-           //return;
+        }
+        static async Task Execute(Texture2D texture, AssetImporter assetImporter)
+        {
+
+            //return;
             //Debug.Log($"sovle texxxx");
             var a = assetImporter as TextureImporter;
 
             //Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(assetImporter.assetPath);
-           var path = assetImporter.assetPath;
-            if (processingTextures.Contains(path))
-                return;
+            var path = assetImporter.assetPath;
+
             //return;
             //if (texture.name.StartsWith("~") || a.assetPath.Contains("common-lib"))//bo qua textures bat dau = "~"
             //if (texture.name.StartsWith("~"))//bo qua textures bat dau = "~"
@@ -141,11 +196,14 @@ namespace Tuan.UtilitiesEditor
             }
 
             Debug.Log($"import texture: {a.assetPath}");
-            if (!processingTextures.Contains(path))
-                processingTextures.Add(path);
 
             EditorCoroutineUtility.StartCoroutineOwnerless(IEImport());
 
+            bool isCOmplte = false;
+            while (!isCOmplte)
+            {
+                await Task.Delay(100);
+            }
             IEnumerator IEImport()
             {
                 for (int i = 0; i < 10; i++)
@@ -153,11 +211,9 @@ namespace Tuan.UtilitiesEditor
                 assetImporter.SaveAndReimport();
                 for (int i = 0; i < 10; i++)
                     yield return null;
-                if (processingTextures.Contains(path))
-                    processingTextures.Remove(path);
+                isCOmplte = true;
             }
         }
-
         static bool powerOfTwo(int n)
         {
             if (n == 0) { return false; }

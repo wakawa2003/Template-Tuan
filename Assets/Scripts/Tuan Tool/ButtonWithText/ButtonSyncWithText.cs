@@ -1,21 +1,20 @@
 
-using TMPro;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace TuanTool
 {
+    [RequireComponent(typeof(CanvasGroup))]
     public class ButtonSyncWithText : Button
     {
-        public TextMeshProUGUI m_Text;
-        public Color m_colorText = Color.white;
+        public CanvasGroup m_CanvasGroup;
 
         protected override void DoStateTransition(SelectionState state, bool instant)
         {
             base.DoStateTransition(state, instant);
 
             Color tintColor;
-            m_Text.color = Color.white * m_colorText;
             switch (state)
             {
                 case SelectionState.Normal:
@@ -38,23 +37,37 @@ namespace TuanTool
                     break;
             }
             if (transition == Transition.ColorTint)
-                m_Text.CrossFadeColor(m_colorText * tintColor * colors.colorMultiplier, instant ? 0f : colors.fadeDuration, true, true);
+                if (m_CanvasGroup != null)
+                {
+                    float a = tintColor.a * tintColor.r * tintColor.g * tintColor.b;
+                    m_CanvasGroup.DOFade(a, instant ? 0f : colors.fadeDuration).SetUpdate(true);
+                }
         }
 
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
             base.OnValidate();
-            m_Text.color = Color.white * m_colorText;
+            Color tintColor = colors.normalColor;
             if (interactable)
-                m_Text.color = m_colorText * colors.normalColor * colors.colorMultiplier;
-            else m_Text.color = m_colorText * colors.disabledColor;
+            {
+                if (m_CanvasGroup != null)
+                    tintColor = colors.normalColor;
+            }
+            else
+            {
+                if (m_CanvasGroup != null)
+                    tintColor = colors.disabledColor;
+            }
+            if (m_CanvasGroup == null) m_CanvasGroup = GetComponentInChildren<CanvasGroup>();
+            float a = tintColor.a * tintColor.r * tintColor.g * tintColor.b;
+            m_CanvasGroup.alpha = a * colors.colorMultiplier;
         }
 
         protected override void Reset()
         {
             base.Reset();
-            if (!m_Text) m_Text = GetComponentInChildren<TextMeshProUGUI>();
+            if (!m_CanvasGroup) m_CanvasGroup = GetComponentInChildren<CanvasGroup>();
         }
 #endif
     }

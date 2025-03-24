@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using TuanTool;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace UnityEditor.UI
@@ -15,13 +16,15 @@ namespace UnityEditor.UI
         SerializedProperty m_OnClickProperty;
         SerializedProperty m_TextProperty;
         SerializedProperty m_colorText;
+        SerializedProperty m_CanvasGroup;
 
         protected override void OnEnable()
         {
             base.OnEnable();
             m_OnClickProperty = serializedObject.FindProperty("m_OnClick");
             m_TextProperty = serializedObject.FindProperty("m_Text");
-            m_colorText = serializedObject.FindProperty("m_colorText");
+            //m_colorText = serializedObject.FindProperty("m_colorText");
+            m_CanvasGroup = serializedObject.FindProperty("m_CanvasGroup");
         }
 
         public override void OnInspectorGUI()
@@ -31,8 +34,9 @@ namespace UnityEditor.UI
 
             serializedObject.Update();
             EditorGUILayout.PropertyField(m_OnClickProperty);
-            EditorGUILayout.PropertyField(m_TextProperty);
-            EditorGUILayout.PropertyField(m_colorText);
+            //EditorGUILayout.PropertyField(m_TextProperty);
+            //EditorGUILayout.PropertyField(m_colorText);
+            EditorGUILayout.PropertyField(m_CanvasGroup);
             serializedObject.ApplyModifiedProperties();
         }
     }

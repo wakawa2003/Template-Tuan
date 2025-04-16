@@ -98,11 +98,11 @@ namespace Tuan.UtilitiesEditor
             }
         }
 
-        private void OnPostprocessTexture(Texture2D texture)
-        {
-            //Execute(texture, assetImporter);
+        //private void OnPostprocessTexture(Texture2D texture)
+        //{
+        //    //Execute(texture, assetImporter);
 
-        }
+        //}
         static async Task Execute(Texture2D texture, AssetImporter assetImporter)
         {
 
@@ -151,21 +151,20 @@ namespace Tuan.UtilitiesEditor
             //    name = "Android",               // Nền tảng
             //    overridden = false,              // Sử dụng cài đặt riêng
             //});
-            a.SetPlatformTextureSettings(new TextureImporterPlatformSettings
-            {
-                //maxTextureSize = a.maxTextureSize,
-                name = "Android",               // Nền tảng
-                overridden = true,              // Sử dụng cài đặt riêng
-                format = TextureImporterFormat.ASTC_12x12, // Định dạng nén mhỏ nhất cho hình ảnh pot.
-                compressionQuality = 100
-            });
+            //a.SetPlatformTextureSettings(new TextureImporterPlatformSettings
+            //{
+            //    //maxTextureSize = a.maxTextureSize,
+            //    name = "Android",               // Nền tảng
+            //    overridden = true,              // Sử dụng cài đặt riêng
+            //    format = TextureImporterFormat.ASTC_12x12, // Định dạng nén mhỏ nhất cho hình ảnh pot.
+            //    compressionQuality = 100
+            //});
 
             var mipmapEnabled = false;
             var textureCompression = TextureImporterCompression.CompressedLQ;
             var alphaIsTransparency = true;
             var compressionQuality = 100;//khong nen de la 50% => bi banding textures
             var crunchedCompression = true;//can phai xep o cuoi
-
 
             if (a.mipmapEnabled != mipmapEnabled)
             {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Events;
 namespace TuanTool
@@ -42,6 +43,7 @@ namespace TuanTool
     public static class TweenExt
     {
 
+
         static TweenExtension getTweenExtension(MonoBehaviour mono)
         {
 
@@ -56,6 +58,16 @@ namespace TuanTool
             return tweenExtension;
         }
 
+        public static Tween KillOnCancellationToken(this Tween tween, CancellationToken destroyCancellationToken)
+        {
+            destroyCancellationToken.Register(() => tween?.Kill(false));
+            return tween;
+        }
+        public static Sequence KillOnCancellationToken(this Sequence seq, CancellationToken destroyCancellationToken)
+        {
+            destroyCancellationToken.Register(() => seq?.Kill(false));
+            return seq;
+        }
         public static Tween KillOnDestroy(this Tween tween, MonoBehaviour mono)
         {
             getTweenExtension(mono).AddTweenKillOnDestory(tween);

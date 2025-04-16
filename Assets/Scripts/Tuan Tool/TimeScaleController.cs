@@ -1,8 +1,11 @@
 
+using Cysharp.Threading.Tasks;
+using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using UnityEngine;
+using UniRx;
 
 namespace TuanTool
 {
@@ -41,6 +44,31 @@ namespace TuanTool
                 return;
             }
             #endregion
+
+
+        }
+
+        [Button]
+        async void testtttt()
+        {
+            var t1 = UniTask.Defer(async () =>
+            {
+                await UniTask.WaitForSeconds(1);
+                Debug.Log($"complete task1");
+            });
+            var t2 = UniTask.Defer(async () =>
+            {
+                await UniTask.WaitForSeconds(2);
+                Debug.Log($"complete task2");
+            });
+            var t3 = UniTask.Defer(async () =>
+            {
+                await UniTask.WaitForSeconds(6);
+                Debug.Log($"complete task3");
+            });
+
+            await UnitaskExtension.TimingTasks(destroyCancellationToken, (1, t1), (2, t2), (6, t3));
+            Debug.Log($"complete");
         }
 
         void OnDestroy()

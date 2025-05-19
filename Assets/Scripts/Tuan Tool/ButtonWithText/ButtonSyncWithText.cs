@@ -40,7 +40,7 @@ namespace TuanTool
                 if (m_CanvasGroup != null)
                 {
                     float a = tintColor.a * tintColor.r * tintColor.g * tintColor.b;
-                    m_CanvasGroup.DOFade(a, instant ? 0f : colors.fadeDuration).SetUpdate(true);
+                    m_CanvasGroup.DOFade(a, instant ? 0f : colors.fadeDuration).SetUpdate(true).KillOnDestroy(m_CanvasGroup.transform);
                 }
         }
 

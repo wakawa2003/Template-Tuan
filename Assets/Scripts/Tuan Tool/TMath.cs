@@ -415,5 +415,48 @@ namespace TuanTool
 
             return -1;
         }
+
+        /// <summary>
+        /// Tạo bound mới có cùng tỷ lệ khung hình 3D (X:Y:Z) với boundReference,
+        /// nhưng đủ lớn để bao trùm hoàn toàn boundTarget.
+        /// </summary>
+        /// <param name="boundTarget">Bound cần được bao trùm</param>
+        /// <param name="boundReference">Bound làm mẫu tỷ lệ (giữ nguyên tỷ lệ X:Y:Z)</param>
+        /// <returns>Bound mới có cùng tỷ lệ và bao trọn boundTarget</returns>
+        public static Bounds ExpandBoundsKeepingAspect3D(Bounds boundTarget, Bounds boundReference)
+        {
+            Vector3 min = boundTarget.min;
+            Vector3 max = boundTarget.max;
+            Vector3 requiredSize = max - min;
+
+            // Tỷ lệ khung hình 3D từ boundReference
+            float aspectXY = boundReference.size.x / boundReference.size.y;
+            float aspectXZ = boundReference.size.x / boundReference.size.z;
+
+            // Tính kích thước mới để giữ tỷ lệ và bao boundTarget
+            float newWidth = requiredSize.x;
+            float newHeight = newWidth / aspectXY;
+            float newDepth = newWidth / aspectXZ;
+
+            // Nếu chưa đủ để bao boundTarget theo Y hoặc Z, mở rộng thêm
+            if (newHeight < requiredSize.y)
+            {
+                newHeight = requiredSize.y;
+                newWidth = newHeight * aspectXY;
+                newDepth = newWidth / aspectXZ;
+            }
+
+            if (newDepth < requiredSize.z)
+            {
+                newDepth = requiredSize.z;
+                newWidth = newDepth * aspectXZ;
+                newHeight = newWidth / aspectXY;
+            }
+
+            Vector3 newSize = new Vector3(newWidth, newHeight, newDepth);
+            Vector3 center = (min + max) / 2f;
+
+            return new Bounds(center, newSize);
+        }
     }
 }

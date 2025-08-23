@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
+using System;
 
 namespace TuanTool
 {
@@ -101,12 +102,14 @@ namespace TuanTool
 
         public GameObject Instantiate(string name, Vector3 pos, Quaternion quaternion)
         {
-            var a = Instantiate(name);
-            a.transform.SetPositionAndRotation(pos, quaternion);
+            var a = Instantiate(name, g =>
+            {
+                g.transform.SetPositionAndRotation(pos, quaternion);
+            });
             return a;
         }
 
-        public GameObject Instantiate(string name)
+        public GameObject Instantiate(string name, Action<GameObject> onBeforeCallSpawnPool = null)
         {
             Init();
             if (!PoolDict.ContainsKey(name))
@@ -130,8 +133,8 @@ namespace TuanTool
                     //Debug.LogError($"Obj {gameObject1.name} is in use!");
                 }
 
-
             gameObject1.SetActive(true);
+            onBeforeCallSpawnPool?.Invoke(gameObject1);
             foreach (var item in gameObject1.GetComponentsInChildren<IPool>(true))
             {
                 item.OnPoolSpawn();

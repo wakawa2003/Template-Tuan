@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
+using System;
 
 namespace TuanTool
 {
@@ -12,7 +13,6 @@ namespace TuanTool
         public class PoolSlot
         {
             public bool AutoInit = true;
-            public bool ReuseInactiveObject = true;
             public string Name;
             [OnValueChanged(nameof(OnObjectChange))]
             public GameObject Object;
@@ -73,7 +73,7 @@ namespace TuanTool
 
             InitForNewGameObject(newGameObject);
             poolSlot._poolQueue.Add(newGameObject);
-            poolSlot.hintIndex = poolSlot._poolQueue.Count - 1;
+            InCreasePoolIndex(poolSlot);
             return newGameObject;
         }
 
@@ -101,12 +101,14 @@ namespace TuanTool
 
         public GameObject Instantiate(string name, Vector3 pos, Quaternion quaternion)
         {
-            var a = Instantiate(name);
-            a.transform.SetPositionAndRotation(pos, quaternion);
+            var a = Instantiate(name, g =>
+            {
+                g.transform.SetPositionAndRotation(pos, quaternion);
+            });
             return a;
         }
 
-        public GameObject Instantiate(string name)
+        public GameObject Instantiate(string name, Action<GameObject> onBeforeCallSpawnPool = null)
         {
             Init();
             if (!PoolDict.ContainsKey(name))
@@ -123,15 +125,9 @@ namespace TuanTool
                 gameObject1 = AddNewGameObjectForSlot(PoolDict[name]);
             }
 
-            if (gameObject1.activeSelf)
-                if (!poolSLot.ReuseInactiveObject)
-                {
-                    gameObject1 = AddNewGameObjectForSlot(PoolDict[name]);
-                    //Debug.LogError($"Obj {gameObject1.name} is in use!");
-                }
-
 
             gameObject1.SetActive(true);
+            onBeforeCallSpawnPool?.Invoke(gameObject1);
             foreach (var item in gameObject1.GetComponentsInChildren<IPool>(true))
             {
                 item.OnPoolSpawn();
@@ -144,14 +140,20 @@ namespace TuanTool
             {
                 for (int i = 0; i < poolSLot._poolQueue.Count; i++)
                 {
-                    poolSLot.hintIndex += 1;
-                    poolSLot.hintIndex = poolSLot.hintIndex % (poolSLot._poolQueue.Count);
+                    InCreasePoolIndex(poolSLot);
                     var obj = poolSLot._poolQueue[poolSLot.hintIndex];
-                    return obj;
+                    if (!obj.activeSelf)
+                        return obj;
                 }
 
                 return null;
             }
+        }
+
+        private static void InCreasePoolIndex(PoolSlot poolSLot)
+        {
+            poolSLot.hintIndex += 1;
+            poolSLot.hintIndex = poolSLot.hintIndex % (poolSLot._poolQueue.Count);
         }
 
         public void UnSpawn(GameObject go)

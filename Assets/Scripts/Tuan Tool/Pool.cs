@@ -123,6 +123,7 @@ namespace TuanTool
             if (gameObject1 == null)
             {
                 gameObject1 = AddNewGameObjectForSlot(PoolDict[name]);
+                Debug.LogWarning($"Can't find: {name} inactive in pool => spawn new object!!");
             }
 
 

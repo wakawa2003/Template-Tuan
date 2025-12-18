@@ -41,7 +41,7 @@ namespace TuanTool.Popup
             #endregion
             DontDestroyOnLoad(gameObject);
 
-            UniTask.Create(async () =>
+            UniTask.Create(async (cancelTokken) =>
             {
                 while (true)
                 {
@@ -50,7 +50,8 @@ namespace TuanTool.Popup
                         var popup = popupQueue[0];
                         try
                         {
-                            await popup.Popup.Show(null);
+                            await popup.Show();
+                            await UniTask.WaitUntil(() => !popup.Popup.IsShowing);
                         }
                         catch (System.Exception e)
                         {
@@ -60,10 +61,10 @@ namespace TuanTool.Popup
                     }
 
                 }
-            }).Forget();
+            }, cancellationToken: destroyCancellationToken).Forget();
         }
 
-        public void AddPopup(IPopup popup, object payloadData)
+        public void AddPopup(IPopup popup, object payloadData = null)
         {
             RequestData requestData = new RequestData(GetNewID(), payloadData, popup);
             popupQueue.Add(requestData);
@@ -92,19 +93,17 @@ namespace TuanTool.Popup
             public object PayloadData { get => payloadData; private set => payloadData = value; }
             public IPopup Popup { get => popup; private set => popup = value; }
 
-            public async Task<UniTask> Show()
+            public async UniTask Show()
             {
                 try
                 {
                     // Show popup logic
                     await popup.Show(payloadData);
-                    await popup.Hide();
                 }
                 catch (System.Exception e)
                 {
                     Debug.LogException(e);
                 }
-                return UniTask.CompletedTask;
             }
         }
     }

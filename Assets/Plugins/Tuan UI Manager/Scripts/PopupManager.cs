@@ -7,7 +7,7 @@ namespace TuanTool.Popup
 {
     public class PopupManager : MonoBehaviour, IPopupManager
     {
-        [SerializeField] private List<RequestData> popupQueue = new List<RequestData>();
+        [SerializeField] private List<RequestData> requestQueue = new List<RequestData>();
 
 
         #region Singleton
@@ -45,21 +45,21 @@ namespace TuanTool.Popup
             {
                 while (true)
                 {
-                    if (popupQueue.Count > 0)
+                    if (requestQueue.Count > 0)
                     {
-                        var popup = popupQueue[0];
+                        var request = requestQueue[0];
                         try
                         {
-                            await popup.Show();
-                            await UniTask.WaitUntil(() => !popup.Popup.IsShowing);
+                            await request.Show();
+                            await UniTask.WaitUntil(() => !request.Popup.IsShowing);
                         }
                         catch (System.Exception e)
                         {
                             Debug.LogException(e);
                         }
-                        popupQueue.RemoveAt(0);
+                        requestQueue.RemoveAt(0);
                     }
-
+                    await UniTask.NextFrame();
                 }
             }, cancellationToken: destroyCancellationToken).Forget();
         }
@@ -67,7 +67,7 @@ namespace TuanTool.Popup
         public void AddPopup(IPopup popup, object payloadData = null)
         {
             RequestData requestData = new RequestData(GetNewID(), payloadData, popup);
-            popupQueue.Add(requestData);
+            requestQueue.Add(requestData);
         }
 
         string GetNewID()
@@ -80,6 +80,7 @@ namespace TuanTool.Popup
         {
             public RequestData(string id, object payloadData, IPopup popup)
             {
+                Debug.Log($"tao request: {id}");
                 this.id = id;
                 this.payloadData = payloadData;
                 this.popup = popup;

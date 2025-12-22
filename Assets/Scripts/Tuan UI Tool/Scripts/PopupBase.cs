@@ -5,7 +5,7 @@ using AYellowpaper;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace TuanTool.Popup
+namespace UITool.Popup
 {
     public abstract class PopupBase : MonoBehaviour, IPopup
     {
@@ -58,7 +58,6 @@ namespace TuanTool.Popup
         public abstract UniTask OnCompleteShow(object payloadData);
         public virtual UniTask OnCompleteHide()
         {
-
             return UniTask.CompletedTask;
 
         }

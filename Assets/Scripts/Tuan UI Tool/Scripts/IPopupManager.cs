@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TuanTool.Popup
+namespace UITool.Popup
 {
     public interface IPopupManager
     {

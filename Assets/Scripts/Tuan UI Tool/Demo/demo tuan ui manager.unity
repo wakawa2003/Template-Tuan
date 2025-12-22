@@ -533,7 +533,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.028093372}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -577,10 +577,10 @@ GameObject:
   - component: {fileID: 1955857856418077019}
   - component: {fileID: 4196951444560632571}
   - component: {fileID: 3838546262116866164}
+  - component: {fileID: 5780474215717484818}
   - component: {fileID: 5780474215717484817}
   - component: {fileID: 5780474215717484815}
   - component: {fileID: 5780474215717484814}
-  - component: {fileID: 5780474215717484818}
   m_Layer: 5
   m_Name: BG
   m_TagString: Untagged
@@ -647,7 +647,7 @@ MonoBehaviour:
   tweenTargetIsTargetGO: 1
   delay: 0
   duration: 0.2
-  easeType: 6
+  easeType: 37
   easeCurve:
     serializedVersion: 2
     m_Curve:
@@ -676,7 +676,7 @@ MonoBehaviour:
   loops: 1
   id: 
   isRelative: 0
-  isFrom: 1
+  isFrom: 0
   isIndependentUpdate: 0
   autoKill: 0
   autoGenerate: 1
@@ -688,7 +688,7 @@ MonoBehaviour:
   forcedTargetType: 3
   autoPlay: 1
   useTargetAsV3: 0
-  endValueFloat: 0
+  endValueFloat: 0.8
   endValueV3: {x: 0, y: 0, z: 0}
   endValueV2: {x: 0, y: 0}
   endValueColor: {r: 1, g: 1, b: 1, a: 1}
@@ -720,7 +720,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a20a9820a592476ab64010f9928f3b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activeObject: {fileID: 0}
+  <Description>k__BackingField: Opening
+  activeObject: {fileID: 5780474215717484813}
   isActiveOnExecute: 1
   isRunBackwards: 0
   dotweenAnimationComponent: []
@@ -736,10 +737,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a20a9820a592476ab64010f9928f3b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activeObject: {fileID: 0}
+  <Description>k__BackingField: Hiding
+  activeObject: {fileID: 5780474215717484813}
   isActiveOnExecute: 0
   isRunBackwards: 1
-  dotweenAnimationComponent: []
+  dotweenAnimationComponent:
+  - {fileID: 5780474215717484815}
 --- !u!114 &6150023143871630186
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -788,6 +791,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8567110343595684786}
   - component: {fileID: 6503985021904931965}
+  - component: {fileID: 8567110343595684793}
   - component: {fileID: 8567110343595684787}
   - component: {fileID: 8567110343595684789}
   - component: {fileID: 8567110343595684790}
@@ -828,7 +832,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2282295698769872008}
   m_Father: {fileID: 908455781522715067}
@@ -892,15 +896,15 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0.13478
-      outSlope: 0.13478
+      inSlope: 0.043716554
+      outSlope: 0.043716554
       tangentMode: 0
       weightedMode: 3
       inWeight: 0
-      outWeight: 0.21075936
+      outWeight: 0.14172778
     - serializedVersion: 3
-      time: 0.3986316
-      value: 0.9041753
+      time: 0.24044374
+      value: 0.877007
       inSlope: 1.4500515
       outSlope: 1.4500515
       tangentMode: 0
@@ -910,11 +914,11 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: -0
-      outSlope: -0
+      inSlope: -0.0040910495
+      outSlope: -0.0040910495
       tangentMode: 0
       weightedMode: 3
-      inWeight: 0.3088823
+      inWeight: 0.42149705
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -935,7 +939,7 @@ MonoBehaviour:
   forcedTargetType: 0
   autoPlay: 1
   useTargetAsV3: 0
-  endValueFloat: 0.2
+  endValueFloat: 0.3
   endValueV3: {x: 0, y: 0, z: 0}
   endValueV2: {x: 0, y: 0}
   endValueColor: {r: 1, g: 1, b: 1, a: 1}
@@ -1002,7 +1006,7 @@ MonoBehaviour:
   tweenTargetIsTargetGO: 1
   delay: 0
   duration: 0.5
-  easeType: 21
+  easeType: 37
   easeCurve:
     serializedVersion: 2
     m_Curve:
@@ -1087,10 +1091,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a20a9820a592476ab64010f9928f3b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activeObject: {fileID: 0}
+  <Description>k__BackingField: opening
+  activeObject: {fileID: 7435516986885861748}
   isActiveOnExecute: 1
   isRunBackwards: 0
-  dotweenAnimationComponent: []
+  dotweenAnimationComponent:
+  - {fileID: 8567110343595684787}
+  - {fileID: 8567110343595684789}
 --- !u!114 &8567110343595684792
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1103,10 +1110,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a20a9820a592476ab64010f9928f3b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activeObject: {fileID: 0}
+  <Description>k__BackingField: hiding
+  activeObject: {fileID: 7435516986885861748}
   isActiveOnExecute: 0
   isRunBackwards: 1
-  dotweenAnimationComponent: []
+  dotweenAnimationComponent:
+  - {fileID: 8567110343595684787}
+  - {fileID: 8567110343595684789}
+--- !u!114 &8567110343595684793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7435516986885861748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 40306178, guid: aa0b1eebb5db27a419fa4564bbe5c9c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  preset: 0
+  onEnableBehaviour: 0
+  onDisableBehaviour: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

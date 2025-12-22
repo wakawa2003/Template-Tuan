@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
+using Sirenix.Utilities;
 using UnityEngine;
+using TuanTool.Popup;
 
-namespace TuanTool.Popup.Test
+namespace UITool.Popup.test
 {
     public class PopupTest : PopupBase
     {
-
 
         [Button]
         public void Test()
@@ -16,7 +17,6 @@ namespace TuanTool.Popup.Test
                 PopupManager.Ins.AddPopup(this);
             else
                 Show(null);
-
         }
 
         [Button]

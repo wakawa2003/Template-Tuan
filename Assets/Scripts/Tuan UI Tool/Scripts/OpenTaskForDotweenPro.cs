@@ -2,21 +2,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using AmplifyShaderEditor;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using DG.Tweening.Core;
+using Sirenix.OdinInspector;
+using TuanTool;
 using UniRx;
 using UnityEngine;
 
-namespace TuanTool.Popup
+namespace UITool.Popup
 {
     [AddComponentMenu("UI manager/Open Task For Dotween Pro")]
     public class OpenTaskForDotweenPro : MonoBehaviour, IUITask
     {
+        [field: SerializeField] public string Description { get; set; }
+
+        [Header("Gameobject to active")]
         [SerializeField] private GameObject activeObject;
         [SerializeField] private bool isActiveOnExecute = true;
+
+        [Header("Tween to run")]
         [SerializeField] private bool isRunBackwards = false;
         [SerializeField] private DOTweenAnimation[] dotweenAnimationComponent;
 
@@ -37,7 +41,6 @@ namespace TuanTool.Popup
             if (dotweenAnimationComponent.Count() == 0)
                 dotweenAnimationComponent = GetComponents<DOTweenAnimation>();
             activeObject.SetActive(false);
-
         }
 
         public async UniTask Execute(CancellationToken cancellationToken)
@@ -58,7 +61,10 @@ namespace TuanTool.Popup
                 {
                     item.CreateTween(false, false);
                     if (isRunBackwards)
+                    {
                         item.DOPlayBackwards();
+                        item.easeCurve = item.easeCurve.InvertX();
+                    }
                     else
                     {
                         item.DORestart();
@@ -77,19 +83,20 @@ namespace TuanTool.Popup
                     // Observable.FromEvent(() => item.tween.onComplete, h => item.tween.onComplete += h, h => item.tween.onComplete -= h)
 
                     bool isCOmpleted = false;
-                    item.tween.onComplete += (() =>
-                     {
-                         Debug.Log($"Complete: {item.name}");
-                         isCOmpleted = true;
-                     });
-
-                    item.tween.onRewind += (() =>
-                    {
-                        Debug.Log($"Complete onRewind:  {item.name}");
-                        isCOmpleted = true;
-                    });
+                    item.tween.onComplete -= _onComplete;
+                    item.tween.onRewind -= _onComplete;
+                    item.tween.onComplete += _onComplete;
+                    item.tween.onRewind += _onComplete;
 
                     tasks.Add(UniTask.WaitUntil(() => isCOmpleted, cancellationToken: cancellationToken));
+
+                    void _onComplete()
+                    {
+                        // Debug.Log($"Complete: {item.name}");
+                        isCOmpleted = true;
+                        item.tween.onComplete -= _onComplete;
+                        item.tween.onRewind -= _onComplete;
+                    }
                 }
 
                 await UniTask.WhenAll(tasks);
@@ -104,12 +111,19 @@ namespace TuanTool.Popup
             await UniTask.CompletedTask;
         }
 
-        // private void Update()
-        // {
-        //     foreach (var item in dotweenAnimationComponent)
-        //     {
-        //         item.DORestart(fromHere: true);
-        //     }
-        // }
+        [Button]
+        public void ForceRunEnd()
+        {
+            Init();
+            if (isActiveOnExecute)
+                activeObject.SetActive(true);
+            foreach (var item in dotweenAnimationComponent)
+            {
+                item.CreateTween(false, false);
+                item.DOComplete(false);
+            }
+            if (!isActiveOnExecute)
+                activeObject.SetActive(false);
+        }
     }
 }

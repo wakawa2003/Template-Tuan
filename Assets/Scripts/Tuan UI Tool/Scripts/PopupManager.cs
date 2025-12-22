@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace TuanTool.Popup
+namespace UITool.Popup
 {
     public class PopupManager : MonoBehaviour, IPopupManager
     {
@@ -40,7 +40,6 @@ namespace TuanTool.Popup
             }
             #endregion
             DontDestroyOnLoad(gameObject);
-
             UniTask.Create(async (cancelTokken) =>
             {
                 while (true)

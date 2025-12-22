@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace TuanTool.Popup
+namespace UITool.Popup
 {
     public interface IPopup
     {

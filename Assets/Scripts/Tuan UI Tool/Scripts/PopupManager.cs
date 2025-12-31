@@ -18,7 +18,7 @@ namespace UITool.Popup
             {
                 if (ins == null)
                 {
-                    var a = new GameObject("PopupManager").AddComponent<PopupManager>();
+                    var a = new GameObject("Popup Manager").AddComponent<PopupManager>();
                     a?.Awake();
                 }
                 return ins;
@@ -47,16 +47,19 @@ namespace UITool.Popup
                     if (requestQueue.Count > 0)
                     {
                         var request = requestQueue[0];
-                        try
+                        if (!request.Popup.IsShowing)
                         {
-                            await request.Show();
-                            await UniTask.WaitUntil(() => !request.Popup.IsShowing);
+                            try
+                            {
+                                await request.Show();
+                                await UniTask.WaitUntil(() => !request.Popup.IsShowing);
+                            }
+                            catch (System.Exception e)
+                            {
+                                Debug.LogException(e);
+                            }
+                            requestQueue.RemoveAt(0);
                         }
-                        catch (System.Exception e)
-                        {
-                            Debug.LogException(e);
-                        }
-                        requestQueue.RemoveAt(0);
                     }
                     await UniTask.NextFrame();
                 }
@@ -97,6 +100,7 @@ namespace UITool.Popup
             {
                 try
                 {
+                    Debug.Log($"request show");
                     // Show popup logic
                     await popup.Show(payloadData);
                 }

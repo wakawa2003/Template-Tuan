@@ -518,8 +518,8 @@ MonoBehaviour:
   - _underlyingValue: {fileID: 5780474215717484817}
   - _underlyingValue: {fileID: 8567110343595684791}
   TasksParallelsBeforeHide:
-  - _underlyingValue: {fileID: 8567110343595684792}
   - _underlyingValue: {fileID: 5780474215717484818}
+  - _underlyingValue: {fileID: 8567110343595684792}
 --- !u!114 &3838546262116866164
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -577,8 +577,8 @@ GameObject:
   - component: {fileID: 1955857856418077019}
   - component: {fileID: 4196951444560632571}
   - component: {fileID: 3838546262116866164}
-  - component: {fileID: 5780474215717484818}
   - component: {fileID: 5780474215717484817}
+  - component: {fileID: 5780474215717484818}
   - component: {fileID: 5780474215717484815}
   - component: {fileID: 5780474215717484814}
   m_Layer: 5
@@ -724,7 +724,8 @@ MonoBehaviour:
   activeObject: {fileID: 5780474215717484813}
   isActiveOnExecute: 1
   isRunBackwards: 0
-  dotweenAnimationComponent: []
+  dotweenAnimationComponent:
+  - {fileID: 5780474215717484815}
 --- !u!114 &5780474215717484818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -791,7 +792,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8567110343595684786}
   - component: {fileID: 6503985021904931965}
-  - component: {fileID: 8567110343595684793}
   - component: {fileID: 8567110343595684787}
   - component: {fileID: 8567110343595684789}
   - component: {fileID: 8567110343595684790}
@@ -939,7 +939,7 @@ MonoBehaviour:
   forcedTargetType: 0
   autoPlay: 1
   useTargetAsV3: 0
-  endValueFloat: 0.3
+  endValueFloat: 0.5
   endValueV3: {x: 0, y: 0, z: 0}
   endValueV2: {x: 0, y: 0}
   endValueColor: {r: 1, g: 1, b: 1, a: 1}
@@ -1117,21 +1117,6 @@ MonoBehaviour:
   dotweenAnimationComponent:
   - {fileID: 8567110343595684787}
   - {fileID: 8567110343595684789}
---- !u!114 &8567110343595684793
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7435516986885861748}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 40306178, guid: aa0b1eebb5db27a419fa4564bbe5c9c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  preset: 0
-  onEnableBehaviour: 0
-  onDisableBehaviour: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

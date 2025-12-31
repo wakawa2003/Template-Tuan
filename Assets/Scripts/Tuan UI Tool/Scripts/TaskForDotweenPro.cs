@@ -11,8 +11,8 @@ using UnityEngine;
 
 namespace UITool.Popup
 {
-    [AddComponentMenu("UI manager/Open Task For Dotween Pro")]
-    public class OpenTaskForDotweenPro : MonoBehaviour, IUITask
+    [AddComponentMenu("UI manager/Task For Dotween Pro")]
+    public class TaskForDotweenPro : MonoBehaviour, IUITask
     {
         [field: SerializeField] public string Description { get; set; }
 
@@ -40,7 +40,9 @@ namespace UITool.Popup
 
             if (dotweenAnimationComponent.Count() == 0)
                 dotweenAnimationComponent = GetComponents<DOTweenAnimation>();
-            activeObject.SetActive(false);
+
+            if (isActiveOnExecute)
+                activeObject.SetActive(false);
         }
 
         public async UniTask Execute(CancellationToken cancellationToken)
@@ -49,7 +51,7 @@ namespace UITool.Popup
             {
 
                 Init();
-                await UniTask.DelayFrame(2, cancellationToken: cancellationToken);
+                // await UniTask.DelayFrame(2, cancellationToken: cancellationToken);
                 Debug.Log($"Execute: {isActiveOnExecute} {isRunBackwards}");
 
                 if (isActiveOnExecute)

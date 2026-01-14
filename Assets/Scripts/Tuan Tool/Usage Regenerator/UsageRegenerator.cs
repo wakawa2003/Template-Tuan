@@ -6,6 +6,7 @@ namespace TuanTool.UsageRegenerator
 
     /// <summary>
     /// sau khi dùng (Use()) đến số lần tối đa sẽ chạy thời gian để reset theo resetDuration
+    /// chỉ chạy resetduration khi RemainingUse <= 0
     /// </summary>
     [System.Serializable]
     public class UsageRegenerator

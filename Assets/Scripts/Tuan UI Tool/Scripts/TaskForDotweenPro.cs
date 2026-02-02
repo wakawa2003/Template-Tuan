@@ -14,17 +14,30 @@ namespace UITool.Popup
     [AddComponentMenu("UI manager/Task For Dotween Pro")]
     public class TaskForDotweenPro : MonoBehaviour, IUITask
     {
-        [field: SerializeField] public string Description { get; set; }
+        public virtual string Description { get; set; }
 
         [Header("Gameobject to active")]
         [SerializeField] private GameObject activeObject;
-        [SerializeField] private bool isActiveOnExecute = true;
+        protected virtual bool isActiveOnExecute { get; set; } = true;
 
         [Header("Tween to run")]
-        [SerializeField] private bool isRunBackwards = false;
         [SerializeField] private DOTweenAnimation[] dotweenAnimationComponent;
+        protected virtual bool isRunBackwards { get; set; } = true;
 
         bool isInit = false;
+
+        void Reset()
+        {
+            activeObject = gameObject;
+            dotweenAnimationComponent = new DOTweenAnimation[] { };
+            foreach (var item in GetComponentsInChildren<DOTweenAnimation>(true))
+            {
+                if (!dotweenAnimationComponent.Contains(item))
+                {
+                    dotweenAnimationComponent = dotweenAnimationComponent.Append(item).ToArray();
+                }
+            }
+        }
 
         void Start()
         {

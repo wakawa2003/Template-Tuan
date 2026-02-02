@@ -9,15 +9,40 @@ namespace UITool.Popup
 {
     public abstract class PopupBase : MonoBehaviour, IPopup
     {
+        public bool IsShowing { get; private set; }
+        [field: SerializeField] public bool IsUseQueue { get; private set; } = true;
+
+
         [SerializeField] List<InterfaceReference<IUITask>> TasksParallelsBeforeOpen;
         [SerializeField] List<InterfaceReference<IUITask>> TasksParallelsBeforeHide;
 
-        public bool IsShowing { get; private set; }
+        void Reset()
+        {
+            TasksParallelsBeforeOpen = new List<InterfaceReference<IUITask>>();
+            TasksParallelsBeforeHide = new List<InterfaceReference<IUITask>>();
+
+            foreach (var item in GetComponentsInChildren<IUITaskOpen>(true))
+            {
+                var a = new InterfaceReference<IUITask>();
+                a.Value = item;
+                TasksParallelsBeforeOpen.Add(a);
+            }
+
+            foreach (var item in GetComponentsInChildren<IUITaskClose>(true))
+            {
+                var a = new InterfaceReference<IUITask>();
+                a.Value = item;
+                TasksParallelsBeforeHide.Add(a);
+            }
+        }
 
         public async UniTask Hide()
         {
             try
             {
+
+                IPopup.OnPopupStartClose?.Invoke(this);
+
                 List<UniTask> tasks = new List<UniTask>();
                 foreach (var task in TasksParallelsBeforeHide)
                 {
@@ -26,6 +51,9 @@ namespace UITool.Popup
                 }
                 await UniTask.WhenAll(tasks);
                 await OnCompleteHide();
+
+                IPopup.OnPopupClosed?.Invoke(this);
+
             }
             catch (System.Exception e)
             {
@@ -34,12 +62,13 @@ namespace UITool.Popup
             IsShowing = false;
         }
 
+
         public async UniTask Show(object payloadData)
         {
-            IsShowing = true;
-
             try
             {
+                IsShowing = true;
+                IPopup.OnPopupStartOpen?.Invoke(this);
                 List<UniTask> tasks = new List<UniTask>();
                 foreach (var task in TasksParallelsBeforeOpen)
                 {
@@ -48,6 +77,9 @@ namespace UITool.Popup
                 }
                 await UniTask.WhenAll(tasks);
                 await OnCompleteShow(payloadData);
+
+                IPopup.OnPopupOpened?.Invoke(this);
+
             }
             catch (System.Exception e)
             {
@@ -60,6 +92,11 @@ namespace UITool.Popup
         {
             return UniTask.CompletedTask;
 
+        }
+
+        public string CallRequestShow(object payloadData)
+        {
+            return (this as IPopup).RequestShow(payloadData);
         }
     }
 }

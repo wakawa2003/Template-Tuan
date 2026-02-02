@@ -13,10 +13,10 @@ namespace UITool.Popup.test
         [Button]
         public void Test()
         {
-            if (Application.isPlaying)
-                PopupManager.Ins.AddPopup(this);
-            else
-                Show(null);
+            // if (Application.isPlaying)
+            //     PopupManager.Ins.AddPopup(this);
+            // else
+            CallRequestShow(null);
         }
 
         [Button]

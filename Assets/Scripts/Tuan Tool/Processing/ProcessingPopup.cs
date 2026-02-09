@@ -75,8 +75,8 @@ namespace TuanTool.Processing
        .SetEase(Ease.Linear)
        .SetLoops(-1, LoopType.Restart)
        .SetLink(Ins.gameObject)
+       .SetUpdate(true)
        .OnKill(() => rotateTween = null);
         }
-
     }
 }

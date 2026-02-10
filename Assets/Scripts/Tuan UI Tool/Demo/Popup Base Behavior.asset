@@ -150,11 +150,29 @@ MonoBehaviour:
   m_Nodes:
   - rid: 4004263411193741630
   - rid: 4004263411193741636
-  m_VersionTimestamp: 639017556896687790
+  <HasOutstandingChanges>k__BackingField: 0
+  m_VersionTimestamp: 639063322158028520
   m_SerializedVersion: 1
   m_DebugInfo: {fileID: -5150141900842716816}
   m_RuntimeGraph: {fileID: -6263284149440224637}
   AssetID:
+    m_Hash128:
+      'bytes[0]': 246
+      'bytes[1]': 179
+      'bytes[2]': 106
+      'bytes[3]': 173
+      'bytes[4]': 237
+      'bytes[5]': 20
+      'bytes[6]': 180
+      'bytes[7]': 184
+      'bytes[8]': 216
+      'bytes[9]': 211
+      'bytes[10]': 122
+      'bytes[11]': 91
+      'bytes[12]': 210
+      'bytes[13]': 131
+      'bytes[14]': 80
+      'bytes[15]': 169
     m_Value0: 13309285809835914230
     m_Value1: 12200396330047820760
   Story:
@@ -167,6 +185,23 @@ MonoBehaviour:
     RuntimeTypeString: Unity.Behavior.Start, Unity.Behavior, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
     RuntimeTypeID:
+      m_Hash128:
+        'bytes[0]': 15
+        'bytes[1]': 14
+        'bytes[2]': 203
+        'bytes[3]': 155
+        'bytes[4]': 159
+        'bytes[5]': 68
+        'bytes[6]': 73
+        'bytes[7]': 46
+        'bytes[8]': 185
+        'bytes[9]': 111
+        'bytes[10]': 4
+        'bytes[11]': 66
+        'bytes[12]': 69
+        'bytes[13]': 73
+        'bytes[14]': 73
+        'bytes[15]': 160
       m_Value0: 3335272451348827663
       m_Value1: 11549843281177505721
     Variables: []
@@ -177,11 +212,28 @@ MonoBehaviour:
     RuntimeTypeString: RunFxOpenAction, Assembly-CSharp-firstpass, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
     RuntimeTypeID:
+      m_Hash128:
+        'bytes[0]': 167
+        'bytes[1]': 218
+        'bytes[2]': 115
+        'bytes[3]': 79
+        'bytes[4]': 12
+        'bytes[5]': 147
+        'bytes[6]': 180
+        'bytes[7]': 137
+        'bytes[8]': 103
+        'bytes[9]': 41
+        'bytes[10]': 154
+        'bytes[11]': 181
+        'bytes[12]': 197
+        'bytes[13]': 53
+        'bytes[14]': 37
+        'bytes[15]': 158
       m_Value0: 9922717560085928615
       m_Value1: 11395573555402516839
     Variables: []
     NamedChildren: []
-    IsPlaceholder: 0
+    IsPlaceholder: 1
   m_Blackboards: []
   m_MainBlackboardAuthoringAsset: {fileID: 2051011910494269547}
   m_CommandBuffer:
@@ -189,29 +241,62 @@ MonoBehaviour:
   m_SubgraphsInfo: []
   m_BlackboardMissingManagedRef: 0
   m_GraphMissingManagedRef: 0
-  m_HasMissingTypeInManagedRef: 0
+  m_HasMissingTypeInManagedRef: 1
+  m_LastSerializedTimestamp: 639063322158028520
+  m_LastRootGraphGenerationTimestamp: 0
   references:
     version: 2
     RefIds:
     - rid: 4004263411193741630
       type: {class: StartNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
-      data:
-        Position: {x: -216.76051, y: -110.52902}
-        ID:
+      data: {<Asset>k__BackingField: {fileID: 0}, Position: {x: -216.76051, y: -110.52902}, ID:
+          m_Hash128:
+            'bytes[0]': 137
+            'bytes[1]': 1
+            'bytes[2]': 8
+            'bytes[3]': 90
+            'bytes[4]': 17
+            'bytes[5]': 121
+            'bytes[6]': 233
+            'bytes[7]': 138
+            'bytes[8]': 155
+            'bytes[9]': 221
+            'bytes[10]': 215
+            'bytes[11]': 156
+            'bytes[12]': 236
+            'bytes[13]': 156
+            'bytes[14]': 191
+            'bytes[15]': 227
           m_Value0: 10009664762239517065
           m_Value1: 16411008107218984347
-        Parents: []
-        PortModels:
+, Parents: []
+, PortModels:
         - rid: 4004263411193741631
-        NodeType:
+, NodeType:
           m_SerializableType: Unity.Behavior.Start, Unity.Behavior, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null
-        NodeTypeID:
+, NodeTypeID:
+          m_Hash128:
+            'bytes[0]': 15
+            'bytes[1]': 14
+            'bytes[2]': 203
+            'bytes[3]': 155
+            'bytes[4]': 159
+            'bytes[5]': 68
+            'bytes[6]': 73
+            'bytes[7]': 46
+            'bytes[8]': 185
+            'bytes[9]': 111
+            'bytes[10]': 4
+            'bytes[11]': 66
+            'bytes[12]': 69
+            'bytes[13]': 73
+            'bytes[14]': 73
+            'bytes[15]': 160
           m_Value0: 3335272451348827663
           m_Value1: 11549843281177505721
-        m_FieldValues: []
-        Repeat: 0
-        AllowMultipleRepeatsPerTick: 0
+, m_FieldValues: []
+, Repeat: 0, AllowMultipleRepeatsPerTick: 0}
     - rid: 4004263411193741631
       type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:
@@ -224,22 +309,55 @@ MonoBehaviour:
         - rid: 4004263411193741637
     - rid: 4004263411193741636
       type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
-      data:
-        Position: {x: -254.61824, y: 39.58116}
-        ID:
+      data: {<Asset>k__BackingField: {fileID: 0}, Position: {x: -254.61824, y: 39.58116}, ID:
+          m_Hash128:
+            'bytes[0]': 78
+            'bytes[1]': 255
+            'bytes[2]': 113
+            'bytes[3]': 125
+            'bytes[4]': 129
+            'bytes[5]': 103
+            'bytes[6]': 194
+            'bytes[7]': 23
+            'bytes[8]': 211
+            'bytes[9]': 107
+            'bytes[10]': 69
+            'bytes[11]': 52
+            'bytes[12]': 84
+            'bytes[13]': 87
+            'bytes[14]': 23
+            'bytes[15]': 216
           m_Value0: 1712044614207274830
           m_Value1: 15571010255822613459
-        Parents: []
-        PortModels:
+, Parents: []
+, PortModels:
         - rid: 4004263411193741637
         - rid: 4004263411193741638
-        NodeType:
+, NodeType:
           m_SerializableType: RunFxOpenAction, Assembly-CSharp-firstpass, Version=0.0.0.0,
             Culture=neutral, PublicKeyToken=null
-        NodeTypeID:
+, NodeTypeID:
+          m_Hash128:
+            'bytes[0]': 167
+            'bytes[1]': 218
+            'bytes[2]': 115
+            'bytes[3]': 79
+            'bytes[4]': 12
+            'bytes[5]': 147
+            'bytes[6]': 180
+            'bytes[7]': 137
+            'bytes[8]': 103
+            'bytes[9]': 41
+            'bytes[10]': 154
+            'bytes[11]': 181
+            'bytes[12]': 197
+            'bytes[13]': 53
+            'bytes[14]': 37
+            'bytes[15]': 158
           m_Value0: 9922717560085928615
           m_Value1: 11395573555402516839
-        m_FieldValues: []
+, m_FieldValues: []
+}
     - rid: 4004263411193741637
       type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:

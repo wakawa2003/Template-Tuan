@@ -16,7 +16,7 @@ namespace UITool.Popup
         [SerializeField] List<InterfaceReference<IUITask>> TasksParallelsBeforeOpen;
         [SerializeField] List<InterfaceReference<IUITask>> TasksParallelsBeforeHide;
 
-        void Reset()
+        public void Reset()
         {
             TasksParallelsBeforeOpen = new List<InterfaceReference<IUITask>>();
             TasksParallelsBeforeHide = new List<InterfaceReference<IUITask>>();

@@ -97,9 +97,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8689681622551078874}
-  - component: {fileID: 3551092474097185114}
-  - component: {fileID: 2896990671911900836}
-  - component: {fileID: 8123226982041612788}
+  - component: {fileID: 3663314038066212719}
+  - component: {fileID: 1285641993177331457}
+  - component: {fileID: 4673751653319202622}
   m_Layer: 5
   m_Name: Popup Templete use Animator
   m_TagString: Untagged
@@ -128,7 +128,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!95 &3551092474097185114
+--- !u!95 &3663314038066212719
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0
@@ -150,7 +150,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &2896990671911900836
+--- !u!114 &1285641993177331457
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -163,9 +163,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Description>k__BackingField: Open by Animator
-  animator: {fileID: 3551092474097185114}
+  animator: {fileID: 3663314038066212719}
   animationTriggerName: Open
---- !u!114 &8123226982041612788
+  DisableObjects:
+  - {fileID: 9094208707101251899}
+  - {fileID: 1203218260000476698}
+--- !u!114 &4673751653319202622
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -178,8 +181,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Description>k__BackingField: Close by Animator
-  animator: {fileID: 3551092474097185114}
+  animator: {fileID: 3663314038066212719}
   animationTriggerName: Close
+  DisableObjects: []
 --- !u!1 &4504119197961447858
 GameObject:
   m_ObjectHideFlags: 0

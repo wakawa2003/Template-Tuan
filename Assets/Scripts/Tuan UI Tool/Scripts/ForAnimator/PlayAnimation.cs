@@ -15,5 +15,10 @@ namespace UITool.Popup
             animator.SetTrigger(animationTriggerName);
             return UniTask.CompletedTask;
         }
+
+        void Reset()
+        {
+            animator = GetComponent<Animator>();
+        }
     }
 }

@@ -62,7 +62,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.028093372}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.6313726}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -158,7 +158,7 @@ MonoBehaviour:
   isFrom: 0
   isIndependentUpdate: 1
   autoKill: 0
-  autoGenerate: 1
+  autoGenerate: 0
   isActive: 1
   isValid: 1
   target: {fileID: 2754762789579971467}
@@ -497,7 +497,7 @@ MonoBehaviour:
   isFrom: 1
   isIndependentUpdate: 1
   autoKill: 0
-  autoGenerate: 1
+  autoGenerate: 0
   isActive: 1
   isValid: 1
   target: {fileID: 4724650344816648534}
@@ -605,7 +605,7 @@ MonoBehaviour:
   isFrom: 1
   isIndependentUpdate: 1
   autoKill: 0
-  autoGenerate: 1
+  autoGenerate: 0
   isActive: 1
   isValid: 1
   target: {fileID: 2344753951830627704}

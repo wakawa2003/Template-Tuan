@@ -67,14 +67,9 @@ namespace TuanTool
             #endregion
 
             DontDestroyOnLoad(gameObject);
-        }
 
-        private void Start()
-        {
             // Tự động đồng bộ giờ ngay khi vừa mở game
             _ = SyncTimeWithInternetAsync();
-
-            // logTimeFromInternet();
         }
 
         [Button]

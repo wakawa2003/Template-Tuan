@@ -1,80 +1,146 @@
 using Sirenix.OdinInspector;
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Burst.Intrinsics;
 using UnityEngine;
 
 namespace TuanTool
 {
-    [AddComponentMenu("Layout/Scale Rect With Parent")]
+    [AddComponentMenu("Layout/Scale Rect With Target")]
     [ExecuteInEditMode, DisallowMultipleComponent, RequireComponent(typeof(RectTransform))]
-    public class ScaleRectWithParent : MonoBehaviour
+    public class ScaleRectWithTarget : MonoBehaviour
     {
-        public float LeftNormal = 0;
-        public float RightNormal = 0;
-        public float TopNormal = 0;
-        public float BotNormal = 0;
 
-        RectTransform RectTransform, parentRect;
-        [ReadOnly]
-        [SerializeField] Vector2 parentSize;
-        Vector2 newOffsetMin, newOffsetMax;
+        [SerializeField] private Vector2 offsetMin = Vector2.zero;
+        [SerializeField] private Vector2 offsetMax = Vector2.zero;
+
+        [SerializeField] private RectTransform RectTransform;
+        [SerializeField] private EGetTargetType getTargetType = EGetTargetType.SetManual;
+        [SerializeField, EnableIf(nameof(getTargetType), EGetTargetType.SetManual)] private RectTransform targetRect; // target cụ thể, gán trong Inspector
+        [SerializeField] private bool isFitSizeOnly = true;
+
+
+        public enum EGetTargetType
+        {
+            SetManual, GetParentCanvas, GetParentRectTransform
+        }
 
         private void Start()
         {
-            RectTransform = GetComponent<RectTransform>();
-            parentRect = transform.parent.GetComponent<RectTransform>();
-         
+            GetData();
             ExecuteScale();
         }
 
 #if UNITY_EDITOR
         private void Reset()
         {
-            //Debug.Log($"reset");
+            GetData();
             GetCurrentNormal();
             ExecuteScale();
         }
 #endif
-
-        void LateUpdate()
+        /// <summary>
+        /// Chỉnh RectTransform A fit với RectTransform B bất kể A đang là con của ai.
+        /// </summary>
+        public void FitToTarget(RectTransform rectA, RectTransform rectB)
         {
+            if (rectA == null || rectB == null) return;
+
+            // Lấy world corners của B
+            Vector3[] worldCorners = new Vector3[4];
+            rectB.GetWorldCorners(worldCorners);
+
+
+            // Chuyển world corners về local space của cha A
+            Transform parent = rectA.parent;
+            Vector2 min = (Vector2)parent.InverseTransformPoint(worldCorners[0]) + offsetMin;
+            Vector2 max = (Vector2)parent.InverseTransformPoint(worldCorners[2]) + offsetMax;
+
+            // Gán lại anchoredPosition và sizeDelta cho A
+            rectA.anchorMin = rectA.anchorMax = Vector2.zero; // dùng pivot cố định
+            rectA.offsetMin = min;
+            rectA.offsetMax = max;
+        }
+        /// <summary>
+        /// Chỉnh RectTransform A có cùng size với RectTransform B,
+        /// nhưng giữ nguyên vị trí hiện tại của A.
+        /// </summary>
+        public void FitSizeOnly(RectTransform rectA, RectTransform rectB)
+        {
+            if (rectA == null || rectB == null) return;
+
+            // Lấy world corners của B
+            Vector3[] worldCorners = new Vector3[4];
+            rectB.GetWorldCorners(worldCorners);
+
+            // Chuyển về local space của cha A
+            Transform parent = rectA.parent;
+            Vector2 min = (Vector2)parent.InverseTransformPoint(worldCorners[0]) + offsetMin;
+            Vector2 max = (Vector2)parent.InverseTransformPoint(worldCorners[2]) + offsetMax;
+
+            // Tính size theo local space
+            Vector2 size = max - min;
+
+            rectA.anchorMin = rectA.anchorMax = Vector2.one / 2f; ; // dùng pivot cố định
+            // Gán sizeDelta, giữ nguyên anchoredPosition
+            rectA.sizeDelta = size;
+        }
+
+        private void LateUpdate()
+        {
+            if (Application.isEditor && !Application.isPlaying)
+            {
+                GetData();
+            }
             ExecuteScale();
         }
 
         [Button]
         public void GetCurrentNormal()
         {
-            RectTransform = GetComponent<RectTransform>();
-            parentRect = transform.parent.GetComponent<RectTransform>();
-            if (parentSize != parentRect.rect.size)
-                parentSize = parentRect.rect.size;
-            LeftNormal = TMath.Remap(RectTransform.offsetMin.x, 0, parentSize.x, 0, 1);
-            RightNormal = TMath.Remap(RectTransform.offsetMax.x, 0, parentSize.x, 0, 1);
-            BotNormal = TMath.Remap(RectTransform.offsetMin.y, 0, parentSize.y, 0, 1);
-            TopNormal = TMath.Remap(RectTransform.offsetMax.y, 0, parentSize.y, 0, 1);
+            GetData();
+        }
+
+        private void GetData()
+        {
+            if (RectTransform == null)
+                RectTransform = GetComponent<RectTransform>();
+
+
+            switch (getTargetType)
+            {
+                case EGetTargetType.GetParentCanvas:
+                    targetRect = GetComponentInParent<Canvas>().transform as RectTransform;
+                    break;
+                case EGetTargetType.GetParentRectTransform:
+                    targetRect = transform.parent as RectTransform;
+                    break;
+            }
+
         }
 
         [Button]
         public void ExecuteScale()
         {
+            // if (targetRect == null) return;
 
-            if (parentSize != parentRect.rect.size)
-                parentSize = parentRect.rect.size;
-            var newLeft = TMath.Remap(LeftNormal, 0, 1, 0, parentSize.x);
-            var newRight = TMath.Remap(RightNormal, 0, 1, 0, parentSize.x);
-            var newTop = TMath.Remap(TopNormal, 0, 1, 0, parentSize.y);
-            var newBot = TMath.Remap(BotNormal, 0, 1, 0, parentSize.y);
+            // targetSize = targetRect.rect.size;
 
-            newOffsetMin = new Vector2(newLeft, newBot);
-            newOffsetMax = new Vector2(newRight, newTop);
+            // var newLeft = TMath.Remap(LeftNormal, 0, 1, 0, targetSize.x);
+            // var newRight = TMath.Remap(RightNormal, 0, 1, 0, targetSize.x);
+            // var newTop = TMath.Remap(TopNormal, 0, 1, 0, targetSize.y);
+            // var newBot = TMath.Remap(BotNormal, 0, 1, 0, targetSize.y);
 
-            if (RectTransform.offsetMin != newOffsetMin)
-                RectTransform.offsetMin = newOffsetMin;
-            if (RectTransform.offsetMax != newOffsetMax)
-                RectTransform.offsetMax = newOffsetMax;
+            // newOffsetMin = new Vector2(newLeft, newBot);
+            // newOffsetMax = new Vector2(newRight, newTop);
 
+            // if (RectTransform.offsetMin != newOffsetMin)
+            //     RectTransform.offsetMin = newOffsetMin;
+            // if (RectTransform.offsetMax != newOffsetMax)
+            //     RectTransform.offsetMax = newOffsetMax;
+
+            if (isFitSizeOnly)
+                FitSizeOnly(RectTransform, targetRect);
+            else
+                FitToTarget(RectTransform, targetRect);
         }
-
-
     }
 }

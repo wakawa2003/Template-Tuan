@@ -23,7 +23,7 @@ namespace AmplifyShaderEditor
 			Value = string.Empty;
 		}
 
-		public UsePassItem( UsePassLocation location, string name )
+		public UsePassItem(UsePassLocation location, string name)
 		{
 			Location = location;
 			Value = name;
@@ -60,7 +60,7 @@ namespace AmplifyShaderEditor
 		private MenuCommand m_dummyCommand;
 		private int m_currentUsePassIdx = 0;
 
-		public void Init( string moduleName )
+		public void Init(string moduleName)
 		{
 			hideFlags = HideFlags.HideAndDontSave;
 			m_moduleName = moduleName;
@@ -71,50 +71,50 @@ namespace AmplifyShaderEditor
 			EditorGUILayout.Separator();
 
 			// Add keyword
-			if( GUILayout.Button( string.Empty, UIUtils.PlusStyle, GUILayout.Width( ShaderKeywordButtonLayoutWidth ) ) )
+			if (GUILayout.Button(string.Empty, UIUtils.PlusStyle, GUILayout.Width(ShaderKeywordButtonLayoutWidth)))
 			{
 				UsePassItem newItem = ScriptableObject.CreateInstance<UsePassItem>();
 				newItem.hideFlags = HideFlags.HideAndDontSave;
-				m_items.Add( newItem );
-				EditorGUI.FocusTextInControl( null );
+				m_items.Add(newItem);
+				EditorGUI.FocusTextInControl(null);
 				m_isDirty = true;
 			}
 
 			//Remove keyword
-			if( GUILayout.Button( string.Empty, UIUtils.MinusStyle, GUILayout.Width( ShaderKeywordButtonLayoutWidth ) ) )
+			if (GUILayout.Button(string.Empty, UIUtils.MinusStyle, GUILayout.Width(ShaderKeywordButtonLayoutWidth)))
 			{
-				if( m_items.Count > 0 )
+				if (m_items.Count > 0)
 				{
-					UsePassItem itemToDelete = m_items[ m_items.Count - 1 ];
-					m_items.RemoveAt( m_items.Count - 1 );
-					ScriptableObject.DestroyImmediate( itemToDelete );
-					EditorGUI.FocusTextInControl( null );
+					UsePassItem itemToDelete = m_items[m_items.Count - 1];
+					m_items.RemoveAt(m_items.Count - 1);
+					ScriptableObject.DestroyImmediate(itemToDelete);
+					EditorGUI.FocusTextInControl(null);
 				}
 				m_isDirty = true;
 			}
 		}
 
-		public void Draw( UndoParentNode owner, bool style = true )
+		public void Draw(UndoParentNode owner, bool style = true)
 		{
-			if( m_owner == null )
+			if (m_owner == null)
 				m_owner = owner;
 
-			if( m_reordableList == null )
+			if (m_reordableList == null)
 			{
-				m_reordableList = new ReorderableList( m_items, typeof( UsePassItem ), true, false, false, false )
+				m_reordableList = new ReorderableList(m_items, typeof(UsePassItem), true, false, false, false)
 				{
 					headerHeight = 0,
 					footerHeight = 0,
 					showDefaultBackground = false,
-					drawElementCallback = ( Rect rect, int index, bool isActive, bool isFocused ) =>
+					drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
 					{
-						if( m_items[ index ] != null )
+						if (m_items[index] != null)
 						{
 							float labelWidthMultiplier;
 							float popUpWidth;
 							float shaderSelectorMultiplier;
 							float buttonPlusPosMultiplier;
-							if( style )
+							if (style)
 							{
 								rect.x -= 10;
 								labelWidthMultiplier = 0.9f;
@@ -131,39 +131,39 @@ namespace AmplifyShaderEditor
 								buttonPlusPosMultiplier = 0.55f;
 							}
 
-							Rect popupPos = new Rect( rect.x, rect.y + 2, popUpWidth * rect.width, rect.height );
-							Rect labelPos = new Rect( rect.x + popupPos.width * labelWidthMultiplier, rect.y, 0.59f * rect.width, rect.height );
+							Rect popupPos = new Rect(rect.x, rect.y + 2, popUpWidth * rect.width, rect.height);
+							Rect labelPos = new Rect(rect.x + popupPos.width * labelWidthMultiplier, rect.y, 0.59f * rect.width, rect.height);
 
-							Rect shaderSelectorPos = new Rect( labelPos.x + labelPos.width* shaderSelectorMultiplier, rect.y, 15, rect.height );
+							Rect shaderSelectorPos = new Rect(labelPos.x + labelPos.width * shaderSelectorMultiplier, rect.y, 15, rect.height);
 
-							Rect buttonPlusPos = new Rect( shaderSelectorPos.x + shaderSelectorPos.width * buttonPlusPosMultiplier, rect.y, ShaderKeywordButtonLayoutWidth, rect.height );
-							Rect buttonMinusPos = new Rect( buttonPlusPos.x + buttonPlusPos.width, rect.y, ShaderKeywordButtonLayoutWidth, rect.height );
+							Rect buttonPlusPos = new Rect(shaderSelectorPos.x + shaderSelectorPos.width * buttonPlusPosMultiplier, rect.y, ShaderKeywordButtonLayoutWidth, rect.height);
+							Rect buttonMinusPos = new Rect(buttonPlusPos.x + buttonPlusPos.width, rect.y, ShaderKeywordButtonLayoutWidth, rect.height);
 
 							EditorGUI.BeginChangeCheck();
-							m_items[ index ].Location = (UsePassLocation)owner.EditorGUIEnumPopup( popupPos, m_items[ index ].Location );
+							m_items[index].Location = (UsePassLocation)owner.EditorGUIEnumPopup(popupPos, m_items[index].Location);
 
-							if( EditorGUI.EndChangeCheck() && m_items[ index ].Location == UsePassLocation.Below && m_owner != null && m_owner.ContainerGraph.CurrentCanvasMode == NodeAvailability.TemplateShader )
+							if (EditorGUI.EndChangeCheck() && m_items[index].Location == UsePassLocation.Below && m_owner != null && m_owner.ContainerGraph.CurrentCanvasMode == NodeAvailability.TemplateShader)
 							{
-								m_items[ index ].Location = UsePassLocation.Above;
-								UIUtils.ShowMessage( "Below option still not available on templates" );
+								m_items[index].Location = UsePassLocation.Above;
+								UIUtils.ShowMessage("Below option still not available on templates");
 							}
-							m_items[ index ].Value = owner.EditorGUITextField( labelPos, string.Empty, m_items[ index ].Value );
+							m_items[index].Value = owner.EditorGUITextField(labelPos, string.Empty, m_items[index].Value);
 
-							if( GUI.Button( shaderSelectorPos, string.Empty, UIUtils.InspectorPopdropdownFallback ) )
+							if (GUI.Button(shaderSelectorPos, string.Empty, UIUtils.InspectorPopdropdownFallback))
 							{
-								EditorGUI.FocusTextInControl( null );
-								GUI.FocusControl( null );
+								EditorGUI.FocusTextInControl(null);
+								GUI.FocusControl(null);
 								m_currentUsePassIdx = index;
-								DisplayShaderContext( owner, GUILayoutUtility.GetRect( GUIContent.none, EditorStyles.popup ) );
+								DisplayShaderContext(owner, GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.popup));
 							}
 
-							if( GUI.Button( buttonPlusPos, string.Empty, UIUtils.PlusStyle ) )
+							if (GUI.Button(buttonPlusPos, string.Empty, UIUtils.PlusStyle))
 							{
 								m_actionType = ReordableAction.Add;
 								m_actionIndex = index;
 							}
 
-							if( GUI.Button( buttonMinusPos, string.Empty, UIUtils.MinusStyle ) )
+							if (GUI.Button(buttonMinusPos, string.Empty, UIUtils.MinusStyle))
 							{
 								m_actionType = ReordableAction.Remove;
 								m_actionIndex = index;
@@ -173,75 +173,75 @@ namespace AmplifyShaderEditor
 				};
 			}
 
-			if( m_actionType != ReordableAction.None )
+			if (m_actionType != ReordableAction.None)
 			{
-				switch( m_actionType )
+				switch (m_actionType)
 				{
 					case ReordableAction.Add:
-					UsePassItem newItem = ScriptableObject.CreateInstance<UsePassItem>();
-					newItem.hideFlags = HideFlags.HideAndDontSave;
-					m_items.Insert( m_actionIndex + 1, newItem );
-					break;
+						UsePassItem newItem = ScriptableObject.CreateInstance<UsePassItem>();
+						newItem.hideFlags = HideFlags.HideAndDontSave;
+						m_items.Insert(m_actionIndex + 1, newItem);
+						break;
 					case ReordableAction.Remove:
-					UsePassItem itemToDelete = m_items[ m_actionIndex ];
-					m_items.RemoveAt( m_actionIndex );
-					ScriptableObject.DestroyImmediate( itemToDelete );
-					break;
+						UsePassItem itemToDelete = m_items[m_actionIndex];
+						m_items.RemoveAt(m_actionIndex);
+						ScriptableObject.DestroyImmediate(itemToDelete);
+						break;
 				}
 				m_isDirty = true;
 				m_actionType = ReordableAction.None;
-				EditorGUI.FocusTextInControl( null );
+				EditorGUI.FocusTextInControl(null);
 			}
 			bool foldoutValue = owner.ContainerGraph.ParentWindow.InnerWindowVariables.ExpandedUsePass;
-			if( style )
+			if (style)
 			{
-				NodeUtils.DrawPropertyGroup( ref foldoutValue, m_moduleName, DrawReordableList, DrawButtons );
+				NodeUtils.DrawPropertyGroup(ref foldoutValue, m_moduleName, DrawReordableList, DrawButtons);
 			}
 			else
 			{
-				NodeUtils.DrawNestedPropertyGroup( ref foldoutValue, m_moduleName, DrawReordableList, DrawButtons );
+				NodeUtils.DrawNestedPropertyGroup(ref foldoutValue, m_moduleName, DrawReordableList, DrawButtons);
 			}
 			owner.ContainerGraph.ParentWindow.InnerWindowVariables.ExpandedUsePass = foldoutValue;
 		}
-		
-		private void DisplayShaderContext( UndoParentNode node, Rect r )
+
+		private void DisplayShaderContext(UndoParentNode node, Rect r)
 		{
-			if( m_dummyCommand == null )
-				m_dummyCommand = new MenuCommand( this, 0 );
+			if (m_dummyCommand == null)
+				m_dummyCommand = new MenuCommand(this, 0);
 
-			if( m_dummyMaterial == null )
-				m_dummyMaterial = new Material( Shader.Find( "Hidden/ASESShaderSelectorUnlit" ) );
+			if (m_dummyMaterial == null)
+				m_dummyMaterial = new Material(Shader.Find("Hidden/ASESShaderSelectorUnlit"));
 
-#pragma warning disable 0618
-			UnityEditorInternal.InternalEditorUtility.SetupShaderMenu( m_dummyMaterial );
-#pragma warning restore 0618
-			EditorUtility.DisplayPopupMenu( r, ShaderPoputContext, m_dummyCommand );
+			// #pragma warning disable 0618
+			// 			UnityEditorInternal.InternalEditorUtility.SetupShaderMenu( m_dummyMaterial );
+			// #pragma warning restore 0618
+			EditorUtility.DisplayPopupMenu(r, ShaderPoputContext, m_dummyCommand);
 		}
 
-		private void OnSelectedShaderPopup( string command, Shader shader )
+		private void OnSelectedShaderPopup(string command, Shader shader)
 		{
-			if( shader != null )
+			if (shader != null)
 			{
 				UIUtils.MarkUndoAction();
-				UndoUtils.RecordObject( m_owner, "Selected Use Pass shader" );
-				m_items[ m_currentUsePassIdx ].Value = shader.name;
+				UndoUtils.RecordObject(m_owner, "Selected Use Pass shader");
+				m_items[m_currentUsePassIdx].Value = shader.name;
 			}
 		}
 
 		void DrawReordableList()
 		{
-			if( m_reordableList != null )
+			if (m_reordableList != null)
 			{
-				if( m_propertyAdjustment == null )
+				if (m_propertyAdjustment == null)
 				{
 					m_propertyAdjustment = new GUIStyle();
 					m_propertyAdjustment.padding.left = 17;
 				}
 				EditorGUILayout.Space();
 
-				if( m_items.Count == 0 )
+				if (m_items.Count == 0)
 				{
-					EditorGUILayout.HelpBox( "Your list is Empty!\nUse the plus button to add one.", MessageType.Info );
+					EditorGUILayout.HelpBox("Your list is Empty!\nUse the plus button to add one.", MessageType.Info);
 				}
 				else
 				{
@@ -251,97 +251,97 @@ namespace AmplifyShaderEditor
 			}
 		}
 
-		public void ReadFromString( ref uint index, ref string[] nodeParams )
+		public void ReadFromString(ref uint index, ref string[] nodeParams)
 		{
 			try
 			{
-				int count = Convert.ToInt32( nodeParams[ index++ ] );
-				for( int i = 0; i < count; i++ )
+				int count = Convert.ToInt32(nodeParams[index++]);
+				for (int i = 0; i < count; i++)
 				{
-					string locationValue = nodeParams[ index++ ];
+					string locationValue = nodeParams[index++];
 					// REMOVE THIS TEST AFTER A COUPLE OF VERSIONS (curr v1.5.6 r02)
-					if( locationValue.Equals( "Bellow" ) ) locationValue = "Below";
+					if (locationValue.Equals("Bellow")) locationValue = "Below";
 
-					UsePassLocation location = (UsePassLocation)Enum.Parse( typeof( UsePassLocation ), locationValue );
-					string name = nodeParams[ index++ ];
+					UsePassLocation location = (UsePassLocation)Enum.Parse(typeof(UsePassLocation), locationValue);
+					string name = nodeParams[index++];
 					UsePassItem newItem = ScriptableObject.CreateInstance<UsePassItem>();
 					newItem.hideFlags = HideFlags.HideAndDontSave;
 					newItem.Location = location;
 					newItem.Value = name;
-					m_items.Add( newItem );
+					m_items.Add(newItem);
 				}
 			}
-			catch( Exception e )
+			catch (Exception e)
 			{
-				Debug.LogException( e );
+				Debug.LogException(e);
 			}
 		}
 
-		public void WriteToString( ref string nodeInfo )
+		public void WriteToString(ref string nodeInfo)
 		{
-			IOUtils.AddFieldValueToString( ref nodeInfo, m_items.Count );
-			for( int i = 0; i < m_items.Count; i++ )
+			IOUtils.AddFieldValueToString(ref nodeInfo, m_items.Count);
+			for (int i = 0; i < m_items.Count; i++)
 			{
-				IOUtils.AddFieldValueToString( ref nodeInfo, m_items[ i ].Location );
-				IOUtils.AddFieldValueToString( ref nodeInfo, m_items[ i ].Value );
+				IOUtils.AddFieldValueToString(ref nodeInfo, m_items[i].Location);
+				IOUtils.AddFieldValueToString(ref nodeInfo, m_items[i].Value);
 			}
 		}
 
-		public void BuildUsePassInfo( MasterNodeDataCollector dataCollector, ref string aboveItems, ref string bellowItems, string tabs)
-		{
-			int count = 0;
-			count = dataCollector.AboveUsePassesList.Count;
-			for( int i = 0; i < count; i++ )
-			{
-				aboveItems += tabs + string.Format( UseGrabFormatNewLine, dataCollector.AboveUsePassesList[ i ].PropertyName );
-			}
-
-			count = dataCollector.BelowUsePassesList.Count;
-			for( int i = 0; i < count; i++ )
-			{
-				bellowItems += tabs + string.Format( UseGrabFormatNewLine,  dataCollector.BelowUsePassesList[ i ].PropertyName );
-			}
-			
-			count = m_items.Count;
-			for( int i = 0; i < count; i++ )
-			{
-				if( m_items[ i ].Location == UsePassLocation.Above )
-				{
-					aboveItems += tabs + string.Format( UseGrabFormatNewLine, m_items[ i ].Value );
-				}
-				else
-				{
-					bellowItems += tabs + string.Format( UseGrabFormatNewLine, m_items[ i ].Value );
-				}
-			}
-		}
-
-		public void BuildUsePassInfo( MasterNodeDataCollector dataCollector, ref List<PropertyDataCollector> aboveItems, ref List<PropertyDataCollector> bellowItems )
+		public void BuildUsePassInfo(MasterNodeDataCollector dataCollector, ref string aboveItems, ref string bellowItems, string tabs)
 		{
 			int count = 0;
 			count = dataCollector.AboveUsePassesList.Count;
-			for( int i = 0; i < count; i++ )
+			for (int i = 0; i < count; i++)
 			{
-				aboveItems.Add( new PropertyDataCollector( -1, string.Format( UseGrabFormat, dataCollector.AboveUsePassesList[ i ].PropertyName ) ) );
+				aboveItems += tabs + string.Format(UseGrabFormatNewLine, dataCollector.AboveUsePassesList[i].PropertyName);
 			}
 
 			count = dataCollector.BelowUsePassesList.Count;
-			for( int i = 0; i < count; i++ )
+			for (int i = 0; i < count; i++)
 			{
-				bellowItems.Add( new PropertyDataCollector( -1, string.Format( UseGrabFormat, dataCollector.BelowUsePassesList[ i ].PropertyName ) ) );
+				bellowItems += tabs + string.Format(UseGrabFormatNewLine, dataCollector.BelowUsePassesList[i].PropertyName);
+			}
+
+			count = m_items.Count;
+			for (int i = 0; i < count; i++)
+			{
+				if (m_items[i].Location == UsePassLocation.Above)
+				{
+					aboveItems += tabs + string.Format(UseGrabFormatNewLine, m_items[i].Value);
+				}
+				else
+				{
+					bellowItems += tabs + string.Format(UseGrabFormatNewLine, m_items[i].Value);
+				}
+			}
+		}
+
+		public void BuildUsePassInfo(MasterNodeDataCollector dataCollector, ref List<PropertyDataCollector> aboveItems, ref List<PropertyDataCollector> bellowItems)
+		{
+			int count = 0;
+			count = dataCollector.AboveUsePassesList.Count;
+			for (int i = 0; i < count; i++)
+			{
+				aboveItems.Add(new PropertyDataCollector(-1, string.Format(UseGrabFormat, dataCollector.AboveUsePassesList[i].PropertyName)));
+			}
+
+			count = dataCollector.BelowUsePassesList.Count;
+			for (int i = 0; i < count; i++)
+			{
+				bellowItems.Add(new PropertyDataCollector(-1, string.Format(UseGrabFormat, dataCollector.BelowUsePassesList[i].PropertyName)));
 			}
 
 
 			count = m_items.Count;
-			for( int i = 0; i < count; i++ )
+			for (int i = 0; i < count; i++)
 			{
-				if( m_items[ i ].Location == UsePassLocation.Above )
+				if (m_items[i].Location == UsePassLocation.Above)
 				{
-					aboveItems.Add( new PropertyDataCollector(-1,string.Format( UseGrabFormat, m_items[ i ].Value )));
+					aboveItems.Add(new PropertyDataCollector(-1, string.Format(UseGrabFormat, m_items[i].Value)));
 				}
 				else
 				{
-					bellowItems.Add( new PropertyDataCollector( -1, string.Format( UseGrabFormat, m_items[ i ].Value ) ) );
+					bellowItems.Add(new PropertyDataCollector(-1, string.Format(UseGrabFormat, m_items[i].Value)));
 				}
 			}
 		}

@@ -884,10 +884,10 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 				return result;
 			}
 
-			[SerializeField]
+			// [SerializeField]
 			internal bool Selected { get; set; }
 
-			[SerializeField]
+			// [SerializeField]
 			internal bool Obscured { get; set; }
 
 			internal PrefsRecord(string newKey, string value, bool encrypted)

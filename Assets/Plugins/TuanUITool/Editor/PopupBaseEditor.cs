@@ -1,6 +1,8 @@
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using UITool.Popup;
+using Cysharp.Threading.Tasks;
 #if UNITY_EDITOR
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector.Editor;
@@ -16,15 +18,21 @@ namespace UITool.Popup.Editor
     public class PopupBaseEditor : UnityEditor.Editor
 #endif
     {
-        private bool showButtons = true;
+#if !ODIN_INSPECTOR
+        private static readonly FieldInfo[] PopupBaseFields = typeof(PopupBase).GetFields(
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+#endif
+
+        private bool showButtonsAutoCreate = true;
+        private bool showPopupSettings = true;
 
         public override void OnInspectorGUI()
         {
             PopupBase targetObject = (PopupBase)target;
 
-            showButtons = EditorGUILayout.Foldout(showButtons, "Popup Settings");
+            showButtonsAutoCreate = EditorGUILayout.Foldout(showButtonsAutoCreate, "Auto Create Settings");
 
-            if (showButtons)
+            if (showButtonsAutoCreate)
             {
                 EditorGUILayout.BeginVertical("box");
 
@@ -41,12 +49,134 @@ namespace UITool.Popup.Editor
                 EditorGUILayout.EndVertical();
             }
 
+#if !ODIN_INSPECTOR
+            DrawPopupSettings(targetObject);
+#endif
+
+#if ODIN_INSPECTOR
+            base.OnInspectorGUI();
+#endif
+
             if (GUI.changed)
             {
                 EditorUtility.SetDirty(targetObject);
             }
+        }
 
-            base.OnInspectorGUI();
+#if ODIN_INSPECTOR
+        protected override void DrawTree()
+        {
+            var tree = Tree;
+            if (tree == null)
+            {
+                return;
+            }
+
+            var popupBaseProperties = new List<InspectorProperty>();
+            var derivedProperties = new List<InspectorProperty>();
+
+            foreach (var property in tree.RootProperty.Children)
+            {
+                if (IsDeclaredByPopupBase(property))
+                {
+                    popupBaseProperties.Add(property);
+                }
+                else
+                {
+                    derivedProperties.Add(property);
+                }
+            }
+
+            tree.BeginDraw(true);
+            try
+            {
+                showPopupSettings = EditorGUILayout.Foldout(showPopupSettings, "Popup Settings");
+
+                if (showPopupSettings)
+                {
+                    EditorGUILayout.BeginVertical("box");
+                    DrawPopupActionButtons((PopupBase)target);
+
+                    foreach (var property in popupBaseProperties)
+                    {
+                        property.Draw();
+                    }
+
+                    EditorGUILayout.EndVertical();
+                }
+
+                foreach (var property in derivedProperties)
+                {
+                    property.Draw();
+                }
+            }
+            finally
+            {
+                tree.EndDraw();
+            }
+        }
+
+        private static bool IsDeclaredByPopupBase(InspectorProperty property)
+        {
+            foreach (var member in property.Info.GetMemberInfos())
+            {
+                if (member.DeclaringType == typeof(PopupBase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+#else
+        private void DrawPopupSettings(PopupBase targetObject)
+        {
+            serializedObject.Update();
+
+            showPopupSettings = EditorGUILayout.Foldout(showPopupSettings, "Popup Settings");
+
+            if (showPopupSettings)
+            {
+                EditorGUILayout.BeginVertical("box");
+                DrawPopupActionButtons(targetObject);
+
+                foreach (var field in PopupBaseFields)
+                {
+                    var property = serializedObject.FindProperty(field.Name);
+                    if (property != null)
+                    {
+                        EditorGUILayout.PropertyField(property, true);
+                    }
+                }
+
+                EditorGUILayout.EndVertical();
+            }
+
+            var excludedProperties = new List<string> { "m_Script" };
+            foreach (var field in PopupBaseFields)
+            {
+                if (serializedObject.FindProperty(field.Name) != null)
+                {
+                    excludedProperties.Add(field.Name);
+                }
+            }
+
+            DrawPropertiesExcluding(serializedObject, excludedProperties.ToArray());
+            serializedObject.ApplyModifiedProperties();
+        }
+#endif
+
+        private void DrawPopupActionButtons(PopupBase targetObject)
+        {
+            if (GUILayout.Button("Show"))
+            {
+                targetObject.Show(null).Forget();
+            }
+
+            if (GUILayout.Button("Hide"))
+            {
+                targetObject.Hide().Forget();
+            }
         }
 
         private void SpawnDefaultPopupUseDotween(PopupBase targetObject)

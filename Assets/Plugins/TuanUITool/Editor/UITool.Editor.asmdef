@@ -2,7 +2,8 @@
     "name": "UITool.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:b877c71a411472148afd453703d66b28"
+        "GUID:b877c71a411472148afd453703d66b28",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
     "includePlatforms": [
         "Editor"

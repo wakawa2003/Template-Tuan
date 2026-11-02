@@ -1,0 +1,11 @@
+{
+    "name": "com.DoanTuan.UITool",
+    "version": "1.0.0",
+    "displayName": "UITool By Tuan Doan",
+    "description": "UITool By Tuan Doan",
+    "unity": "6000.3.27f1",
+    "author": {
+        "name": "Doan Dac Tuan",
+        "url": "https://github.com/wakawa2003"
+    }
+}

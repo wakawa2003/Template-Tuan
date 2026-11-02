@@ -2,7 +2,7 @@ using System;
 using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEngine;
-
+using UITool.Popup;
 namespace UITool.Popup.Editor
 {
     [CustomEditor(typeof(PopupBase), true)]

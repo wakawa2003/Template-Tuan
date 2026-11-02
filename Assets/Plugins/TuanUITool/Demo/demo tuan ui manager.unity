@@ -762,12 +762,8 @@ MonoBehaviour:
   <IsUseQueue>k__BackingField: 1
   TasksParallelsBeforeOpen:
   - _underlyingValue: {fileID: 656956665}
-  - _underlyingValue: {fileID: 0}
-  - _underlyingValue: {fileID: 0}
   TasksParallelsBeforeHide:
   - _underlyingValue: {fileID: 656956664}
-  - _underlyingValue: {fileID: 0}
-  - _underlyingValue: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

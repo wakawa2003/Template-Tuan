@@ -47,7 +47,7 @@ namespace UITool.Popup
                 foreach (var task in TasksParallelsBeforeHide)
                 {
                     tasks.Add(task.Value.Execute(destroyCancellationToken));
-                    Debug.Log($"run {task.Value}");
+                    // Debug.Log($"run {task.Value}");
                 }
                 await UniTask.WhenAll(tasks);
                 await OnCompleteHide();
@@ -73,7 +73,7 @@ namespace UITool.Popup
                 foreach (var task in TasksParallelsBeforeOpen)
                 {
                     tasks.Add(task.Value.Execute(destroyCancellationToken));
-                    Debug.Log($"run {task.Value}");
+                    // Debug.Log($"run {task.Value}");
                 }
                 await UniTask.WhenAll(tasks);
                 await OnCompleteShow(payloadData);

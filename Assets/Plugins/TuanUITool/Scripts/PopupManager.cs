@@ -122,7 +122,7 @@ namespace UITool.Popup
         {
             public RequestData(string id, object payloadData, IPopup popup)
             {
-                Debug.Log($"tao request: {id}");
+                Debug.Log($"Create Popup request: {id}");
                 this.id = id;
                 this.payloadData = payloadData;
                 var p = new InterfaceReference<IPopup>();
@@ -141,7 +141,7 @@ namespace UITool.Popup
             {
                 try
                 {
-                    Debug.Log($"request show");
+                    // Debug.Log($"request show");
                     // Show popup logic
                     await popup.Value.Show(payloadData);
                 }

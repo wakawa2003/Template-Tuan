@@ -3,7 +3,6 @@ using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
 using UnityEngine;
-using TuanTool.Popup;
 
 namespace UITool.Popup.test
 {

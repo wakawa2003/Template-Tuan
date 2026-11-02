@@ -4,9 +4,8 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using R3;
 using Sirenix.OdinInspector;
-using TuanTool;
-using UniRx;
 using UnityEngine;
 
 namespace UITool.Popup

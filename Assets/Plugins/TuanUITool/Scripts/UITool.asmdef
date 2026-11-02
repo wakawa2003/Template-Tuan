@@ -2,9 +2,9 @@
     "name": "UITool",
     "rootNamespace": "",
     "references": [
-        "GUID:31976cc9e85bdd9459e856fcb40d0d50",
-        "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:ecc362f9806bd0348a66a14b999acb0b"
+        "AYellowpaper.SerializeInterfaces",
+        "UniTask",
+        "DOTweenPro.Scripts"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

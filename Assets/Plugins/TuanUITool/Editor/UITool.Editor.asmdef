@@ -1,0 +1,18 @@
+{
+    "name": "UITool.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:b877c71a411472148afd453703d66b28"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

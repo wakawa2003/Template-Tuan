@@ -1,8 +1,5 @@
 
 
-using System.Collections;
-
-using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -56,8 +53,8 @@ namespace TuanTool.Popup
         [Tooltip("If true, BS will unactive when Show complete, else do nothing.")]
         [BoxGroup("Black Screen")][ShowIf("@blackScreen!=null")] public bool AutoDisableBlackScreenInCompleteShow = false;
         [BoxGroup("Black Screen")][LabelText("Color Start Show")][ShowIf("@blackScreen!=null")] public Color ColorBlackScreenStartShow = new Color(0, 0, 0, 0);
-        [BoxGroup("Black Screen")][LabelText("Color End Show")][ShowIf("@blackScreen!=null")] public Color ColorBlackScreenEndShow = new Color(0, 0, 0, 0.5f);
-        [BoxGroup("Black Screen")][LabelText("Color Start Hide")][ShowIf("@blackScreen!=null")] public Color ColorBlackScreenStartHide = new Color(0, 0, 0, 0.5f);
+        [BoxGroup("Black Screen")][LabelText("Color End Show")][ShowIf("@blackScreen!=null")] public Color ColorBlackScreenEndShow = new Color(0, 0, 0, 1f);
+        [BoxGroup("Black Screen")][LabelText("Color Start Hide")][ShowIf("@blackScreen!=null")] public Color ColorBlackScreenStartHide = new Color(0, 0, 0, 1f);
         [BoxGroup("Black Screen")][LabelText("Color End Hide")][ShowIf("@blackScreen!=null")] public Color ColorBlackScreenEndHide = new Color(0, 0, 0, 0);
         [MinMaxSlider(0, 1f), SerializeField][BoxGroup("Black Screen")] Vector2 minMaxCanvasGroupBG = new Vector2(0, 0.7f);
 
@@ -73,8 +70,10 @@ namespace TuanTool.Popup
         [BoxGroup("Use Scale")][ShowIf("useScale")] public Vector3 endScale = Vector3.one;
 
         [BoxGroup("Use Scale")][ShowIf("useScale")] public Ease easeScaleOpen = Ease.OutBack;
+        [BoxGroup("Use Scale")][ShowIf("@useScale && this.easeScaleOpen == Ease.INTERNAL_Custom")] public AnimationCurve animCurverScaleOpen;
 
         [BoxGroup("Use Scale")][ShowIf("useScale")] public Ease easeScaleClose = Ease.InBack;
+        [BoxGroup("Use Scale")][ShowIf("@useScale && this.easeScaleClose == Ease.INTERNAL_Custom")] public AnimationCurve animCurverScaleClose;
 
         //[GUIColor(0.8f, 1f, 0.8f)]
         [BoxGroup("Use Translation")] public bool useTranslation = false;
@@ -84,8 +83,10 @@ namespace TuanTool.Popup
         [BoxGroup("Use Translation")][ShowIf("useTranslation")] public Vector3 endPos = new Vector3(500, 0, 0);
 
         [BoxGroup("Use Translation")][ShowIf("useTranslation")] public Ease easeTranslationOpen = Ease.OutBack;
+        [BoxGroup("Use Translation")][ShowIf("@useTranslation && easeTranslationOpen==Ease.INTERNAL_Custom")] public AnimationCurve curverTranslationOpen;
 
         [BoxGroup("Use Translation")][ShowIf("useTranslation")] public Ease easeTranslationClose = Ease.InBack;
+        [BoxGroup("Use Translation")][ShowIf("@useTranslation && easeTranslationClose==Ease.INTERNAL_Custom")] public AnimationCurve curverTranslationClose;
 
         [FoldoutGroup("Events")] public UnityEvent OnStartShow;
         [FoldoutGroup("Events")] public UnityEvent OnCompleteShow;
@@ -96,7 +97,6 @@ namespace TuanTool.Popup
         Image imgBlackScreen;
         string initName;
         private Rect LastSafeArea = new Rect(0, 0, 0, 0);
-
 
         protected virtual void Awake()
         {
@@ -184,13 +184,15 @@ namespace TuanTool.Popup
                 content.transform.localScale = startScale;
                 content.anchoredPosition = defaultPos;
 
-                content.transform.DOScale(defaultScale, durationOpen).SetEase(easeScaleOpen).SetUpdate(IgnoreScaleTime).OnComplete(delegate ()
-                {
-                    CompleteShow(delegate
-                    {
-                        onComplete?.Invoke();
-                    });
-                });
+                Tween tweenScale = content.transform.DOScale(defaultScale, durationOpen).SetUpdate(IgnoreScaleTime).OnComplete(delegate ()
+                   {
+                       CompleteShow(delegate
+                       {
+                           onComplete?.Invoke();
+                       });
+                   });
+
+                setEaseTween(tweenScale, easeScaleOpen, animCurverScaleOpen);
 
             }
 
@@ -199,15 +201,15 @@ namespace TuanTool.Popup
                 content.transform.localScale = defaultScale;
                 content.anchoredPosition = startPos;
 
-                content.DOAnchorPos(defaultPos, durationOpen).SetUpdate(IgnoreScaleTime).SetEase(easeTranslationOpen).OnComplete(delegate ()
-
-                {
-                    CompleteShow(delegate
-                    {
-                        onComplete?.Invoke();
-                    });
-                });
-
+                Tween tweeen1 = content.DOAnchorPos(defaultPos, durationOpen).SetUpdate(IgnoreScaleTime);
+                tweeen1.OnComplete(delegate ()
+                  {
+                      CompleteShow(delegate
+                      {
+                          onComplete?.Invoke();
+                      });
+                  });
+                setEaseTween(tweeen1, easeTranslationOpen, curverTranslationOpen);
             }
 
 
@@ -217,17 +219,18 @@ namespace TuanTool.Popup
 
                 content.anchoredPosition = startPos;
 
-                content.DOAnchorPos(defaultPos, durationOpen).SetUpdate(IgnoreScaleTime).SetEase(easeTranslationOpen);
-
+                var tweenTransOpen = content.DOAnchorPos(defaultPos, durationOpen).SetUpdate(IgnoreScaleTime);
+                setEaseTween(tweenTransOpen, easeTranslationOpen, curverTranslationOpen);
                 content.transform.localScale = startScale;
 
-                content.transform.DOScale(defaultScale, durationOpen).SetUpdate(IgnoreScaleTime).SetEase(easeScaleOpen).OnComplete(delegate ()
-                {
-                    CompleteShow(delegate
+                var tweenScale = content.transform.DOScale(defaultScale, durationOpen).SetUpdate(IgnoreScaleTime);
+                setEaseTween(tweenScale, easeScaleOpen, animCurverScaleOpen).OnComplete(delegate ()
                     {
-                        onComplete?.Invoke();
+                        CompleteShow(delegate
+                        {
+                            onComplete?.Invoke();
+                        });
                     });
-                });
 
             }
             OnStartShow?.Invoke();
@@ -308,7 +311,8 @@ namespace TuanTool.Popup
             if (useTranslation)
             {
                 content.anchoredPosition = defaultPos;
-                content.DOAnchorPos(endPos, durationClose).SetUpdate(IgnoreScaleTime).SetEase(easeTranslationClose).OnComplete(delegate ()
+                var a = content.DOAnchorPos(endPos, durationClose).SetUpdate(IgnoreScaleTime);
+                setEaseTween(a, easeTranslationClose, curverTranslationClose).OnComplete(delegate ()
                 {
                     CompleteHide(delegate
                     {
@@ -319,13 +323,16 @@ namespace TuanTool.Popup
             if (useScale)
             {
                 content.localScale = defaultScale;
-                content.transform.DOScale(endScale, durationClose).SetUpdate(IgnoreScaleTime).SetEase(easeScaleClose).OnComplete(delegate ()
-                          {
-                              CompleteHide(delegate
-                              {
-                                  onComplete?.Invoke();
-                              });
-                          });
+                var a = content.transform.DOScale(endScale, durationClose).SetUpdate(IgnoreScaleTime);
+                setEaseTween(a, easeScaleClose, animCurverScaleClose);
+                a.OnComplete(delegate ()
+                            {
+                                CompleteHide(delegate
+                                {
+                                    onComplete?.Invoke();
+                                });
+                            });
+
             }
             OnStartHide?.Invoke();
 
@@ -338,6 +345,17 @@ namespace TuanTool.Popup
                     tween = canvasGroup.DOFade(minMax.x, duration).SetUpdate(ignoreTImeScale);
                 }
             }
+        }
+
+        Tween setEaseTween(Tween tween, Ease ease, AnimationCurve animationCurve)
+        {
+            if (ease == Ease.INTERNAL_Custom)
+                tween.SetEase(animationCurve);
+            else
+            {
+                tween.SetEase(ease);
+            }
+            return tween;
         }
 
         public virtual void CompleteHide()

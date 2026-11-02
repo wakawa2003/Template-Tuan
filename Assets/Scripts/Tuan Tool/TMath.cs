@@ -39,6 +39,32 @@ namespace TuanTool
             return Mathf.Pow(1 - t, 3) * p0 + 3 * (1 - t) * (1 - t) * t * p1 + 3 * (1 - t) * t * t * p2 + Mathf.Pow(t, 3) * p3;
         }
 
+        /// <summary>
+        /// get giao diem giua tia (ray) va mat phang.
+        /// </summary>
+        /// <param name="rayOrigin"></param>
+        /// <param name="rayDirection"></param>
+        /// <param name="planePoint"></param>
+        /// <param name="planeNormal"></param>
+        /// <returns></returns>
+        public static Vector3 GetIntersectionPointVsPlane(Vector3 rayOrigin, Vector3 rayDirection, Vector3 planePoint, Vector3 planeNormal)
+        {
+            // 1. Khởi tạo mặt phẳng từ một điểm trên mặt phẳng và vector pháp tuyến
+            Plane plane = new Plane(planeNormal, planePoint);
+
+            // 2. Tạo một tia (Ray) xuất phát từ rayOrigin theo hướng rayDirection
+            Ray ray = new Ray(rayOrigin, rayDirection);
+
+            // 3. Sử dụng hàm Raycast của Plane để tìm khoảng cách từ rayOrigin đến điểm giao
+            if (plane.Raycast(ray, out float enter))
+            {
+                // 4. Lấy tọa độ điểm giao dựa trên khoảng cách 'enter'
+                return ray.GetPoint(enter);
+            }
+
+            // Nếu tia không cắt mặt phẳng (song song hoặc hướng ngược lại)
+            return Vector3.zero;
+        }
         public static Vector2 GiaoDiem2DuongThang(Vector2 A, Vector2 B, Vector2 C, Vector2 D)
         {
             // Line AB represented as a1x + b1y = c1  

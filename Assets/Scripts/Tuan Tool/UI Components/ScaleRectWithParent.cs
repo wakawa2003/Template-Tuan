@@ -6,6 +6,7 @@ namespace TuanTool
 {
     [AddComponentMenu("Layout/Scale Rect With Target")]
     [ExecuteInEditMode, DisallowMultipleComponent, RequireComponent(typeof(RectTransform))]
+    [DefaultExecutionOrder(99999)]
     public class ScaleRectWithTarget : MonoBehaviour
     {
 
@@ -15,7 +16,8 @@ namespace TuanTool
         [SerializeField] private RectTransform RectTransform;
         [SerializeField] private EGetTargetType getTargetType = EGetTargetType.SetManual;
         [SerializeField, EnableIf(nameof(getTargetType), EGetTargetType.SetManual)] private RectTransform targetRect; // target cụ thể, gán trong Inspector
-        [SerializeField] private bool isFitSizeOnly = true;
+        [SerializeField] private bool isSyncPosition = true;
+        [SerializeField] private bool isFitSize = true;
 
 
         public enum EGetTargetType
@@ -42,22 +44,7 @@ namespace TuanTool
         /// </summary>
         public void FitToTarget(RectTransform rectA, RectTransform rectB)
         {
-            if (rectA == null || rectB == null) return;
-
-            // Lấy world corners của B
-            Vector3[] worldCorners = new Vector3[4];
-            rectB.GetWorldCorners(worldCorners);
-
-
-            // Chuyển world corners về local space của cha A
-            Transform parent = rectA.parent;
-            Vector2 min = (Vector2)parent.InverseTransformPoint(worldCorners[0]) + offsetMin;
-            Vector2 max = (Vector2)parent.InverseTransformPoint(worldCorners[2]) + offsetMax;
-
-            // Gán lại anchoredPosition và sizeDelta cho A
-            rectA.anchorMin = rectA.anchorMax = Vector2.zero; // dùng pivot cố định
-            rectA.offsetMin = min;
-            rectA.offsetMax = max;
+            rectA.transform.position = rectB.transform.position;
         }
         /// <summary>
         /// Chỉnh RectTransform A có cùng size với RectTransform B,
@@ -120,26 +107,9 @@ namespace TuanTool
         [Button]
         public void ExecuteScale()
         {
-            // if (targetRect == null) return;
-
-            // targetSize = targetRect.rect.size;
-
-            // var newLeft = TMath.Remap(LeftNormal, 0, 1, 0, targetSize.x);
-            // var newRight = TMath.Remap(RightNormal, 0, 1, 0, targetSize.x);
-            // var newTop = TMath.Remap(TopNormal, 0, 1, 0, targetSize.y);
-            // var newBot = TMath.Remap(BotNormal, 0, 1, 0, targetSize.y);
-
-            // newOffsetMin = new Vector2(newLeft, newBot);
-            // newOffsetMax = new Vector2(newRight, newTop);
-
-            // if (RectTransform.offsetMin != newOffsetMin)
-            //     RectTransform.offsetMin = newOffsetMin;
-            // if (RectTransform.offsetMax != newOffsetMax)
-            //     RectTransform.offsetMax = newOffsetMax;
-
-            if (isFitSizeOnly)
+            if (isFitSize)
                 FitSizeOnly(RectTransform, targetRect);
-            else
+            if (isSyncPosition)
                 FitToTarget(RectTransform, targetRect);
         }
     }

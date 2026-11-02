@@ -1,7 +1,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using UniRx;
 using UnityEngine;
 
 namespace TuanTool
@@ -103,10 +102,10 @@ namespace TuanTool
             }
         }
 
-        public static System.IObservable<bool> IsAliveAsObservable(this ParticleSystem particle, bool whereBool)
-        {
-            return particle.ObserveEveryValueChanged(_ => _.IsAlive(true) && particle != null).Where(_ => _ == whereBool);
-        }
+        // public static System.IObservable<bool> IsAliveAsObservable(this ParticleSystem particle, bool whereBool)
+        // {
+        //     return particle.ObserveEveryValueChanged(_ => _.IsAlive(true) && particle != null).Where(_ => _ == whereBool);
+        // }
 
         /// <summary>
         /// Inverts the X axis (time) of an AnimationCurve.

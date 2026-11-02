@@ -8,11 +8,8 @@ using Sirenix.OdinInspector;
 namespace TuanTool.Popup
 {
     public class PopupManager : MonoBehaviour
-
     {
         public Popup Currentpopup;
-
-
 
         public List<Popup> popups = new List<Popup>();
 

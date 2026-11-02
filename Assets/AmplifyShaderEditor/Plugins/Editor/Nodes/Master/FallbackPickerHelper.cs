@@ -25,56 +25,56 @@ namespace AmplifyShaderEditor
 			m_dummyCommand = null;
 		}
 
-		public void Draw( ParentNode owner )
+		public void Draw(ParentNode owner)
 		{
 			EditorGUILayout.BeginHorizontal();
-			m_fallbackShader = owner.EditorGUILayoutTextField( FallbackShaderStr, m_fallbackShader );
-			if ( GUILayout.Button( string.Empty, UIUtils.InspectorPopdropdownFallback, GUILayout.Width( 17 ), GUILayout.Height( 19 ) ) )
+			m_fallbackShader = owner.EditorGUILayoutTextField(FallbackShaderStr, m_fallbackShader);
+			if (GUILayout.Button(string.Empty, UIUtils.InspectorPopdropdownFallback, GUILayout.Width(17), GUILayout.Height(19)))
 			{
-				EditorGUI.FocusTextInControl( null );
-				GUI.FocusControl( null );
-				DisplayShaderContext( owner, GUILayoutUtility.GetRect( GUIContent.none, EditorStyles.popup ) );
+				EditorGUI.FocusTextInControl(null);
+				GUI.FocusControl(null);
+				DisplayShaderContext(owner, GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.popup));
 			}
 			EditorGUILayout.EndHorizontal();
 		}
 
-		private void DisplayShaderContext( ParentNode node, Rect r )
+		private void DisplayShaderContext(ParentNode node, Rect r)
 		{
-			if ( m_dummyCommand == null )
-				m_dummyCommand = new MenuCommand( this, 0 );
+			if (m_dummyCommand == null)
+				m_dummyCommand = new MenuCommand(this, 0);
 
-			if ( m_dummyMaterial == null )
-				m_dummyMaterial = new Material( Shader.Find( "Hidden/ASESShaderSelectorUnlit" ) );
+			if (m_dummyMaterial == null)
+				m_dummyMaterial = new Material(Shader.Find("Hidden/ASESShaderSelectorUnlit"));
 
-// #pragma warning disable 0618
-// 			UnityEditorInternal.InternalEditorUtility.SetupShaderMenu( m_dummyMaterial );
-// #pragma warning restore 0618
-			EditorUtility.DisplayPopupMenu( r, ShaderPoputContext, m_dummyCommand );
+			// #pragma warning disable 0618
+			// UnityEditorInternal.InternalEditorUtility.SetupShaderMenu( m_dummyMaterial );
+			// #pragma warning restore 0618
+			EditorUtility.DisplayPopupMenu(r, ShaderPoputContext, m_dummyCommand);
 		}
 
-		private void OnSelectedShaderPopup( string command, Shader shader )
+		private void OnSelectedShaderPopup(string command, Shader shader)
 		{
-			if ( shader != null )
+			if (shader != null)
 			{
 				UIUtils.MarkUndoAction();
-				UndoUtils.RecordObject( this, "Selected fallback shader" );
+				UndoUtils.RecordObject(this, "Selected fallback shader");
 				m_fallbackShader = shader.name;
 			}
 		}
-		
-		public void ReadFromString( ref uint index, ref string[] nodeParams )
+
+		public void ReadFromString(ref uint index, ref string[] nodeParams)
 		{
-			m_fallbackShader = nodeParams[ index++ ];
+			m_fallbackShader = nodeParams[index++];
 		}
 
-		public void WriteToString( ref string nodeInfo )
+		public void WriteToString(ref string nodeInfo)
 		{
-			IOUtils.AddFieldValueToString( ref nodeInfo, m_fallbackShader );
+			IOUtils.AddFieldValueToString(ref nodeInfo, m_fallbackShader);
 		}
 
 		public void Destroy()
 		{
-			GameObject.DestroyImmediate( m_dummyMaterial );
+			GameObject.DestroyImmediate(m_dummyMaterial);
 			m_dummyMaterial = null;
 			m_dummyCommand = null;
 		}
@@ -83,10 +83,10 @@ namespace AmplifyShaderEditor
 		{
 			get
 			{
-				if( string.IsNullOrEmpty( m_fallbackShader ) )
+				if (string.IsNullOrEmpty(m_fallbackShader))
 					return "\t" + FallbackOff + "\n";
 
-				return "\t" + string.Format( FallbackFormat, m_fallbackShader ) + "\n";
+				return "\t" + string.Format(FallbackFormat, m_fallbackShader) + "\n";
 			}
 		}
 
@@ -94,10 +94,10 @@ namespace AmplifyShaderEditor
 		{
 			get
 			{
-				if( string.IsNullOrEmpty( m_fallbackShader ) )
+				if (string.IsNullOrEmpty(m_fallbackShader))
 					return FallbackOff;
 
-				return string.Format( FallbackFormat, m_fallbackShader );
+				return string.Format(FallbackFormat, m_fallbackShader);
 			}
 		}
 
@@ -114,7 +114,7 @@ namespace AmplifyShaderEditor
 		}
 
 
-		public bool Active { get { return !string.IsNullOrEmpty( m_fallbackShader ); } }
+		public bool Active { get { return !string.IsNullOrEmpty(m_fallbackShader); } }
 
 	}
 }

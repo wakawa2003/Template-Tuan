@@ -99,10 +99,10 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 
 		[DidReloadScripts]
 		private static void OnRecompile()
-		{ 
+		{
 			if (instance) instance.Repaint();
 		}
-		 
+
 		private void OnEnable()
 		{
 			instance = this;
@@ -167,7 +167,7 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 			{
 				using (ActEditorGUI.Horizontal(ActEditorGUI.PanelWithBackground))
 				{
-					string[] types = {"String", "Int", "Float"};
+					string[] types = { "String", "Int", "Float" };
 					newRecordType = EditorGUILayout.Popup(newRecordType, types, GUILayout.Width(50));
 
 					newRecordEncrypted = GUILayout.Toggle(newRecordEncrypted, new GUIContent("E", "Create new pref as encrypted ObscuredPref?"), ActEditorGUI.CompactButton, GUILayout.Width(25));
@@ -200,9 +200,9 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 					if (GUILayout.Button("OK", ActEditorGUI.CompactButton, GUILayout.Width(30)))
 					{
 						if (string.IsNullOrEmpty(newRecordKey) ||
-						    (newRecordType == 0 && string.IsNullOrEmpty(newRecordStringValue)) ||
-						    (newRecordType == 1 && newRecordIntValue == 0) ||
-						    (newRecordType == 2 && Math.Abs(newRecordFloatValue) < 0.00000001f))
+							(newRecordType == 0 && string.IsNullOrEmpty(newRecordStringValue)) ||
+							(newRecordType == 1 && newRecordIntValue == 0) ||
+							(newRecordType == 2 && Math.Abs(newRecordFloatValue) < 0.00000001f))
 						{
 							ShowNotification(new GUIContent("Please fill in the pref first!"));
 						}
@@ -297,7 +297,7 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 							{
 								record.Delete();
 							}
-							
+
 							RefreshData();
 							GUIUtility.keyboardControl = 0;
 						}
@@ -319,7 +319,7 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 
 		private void DrawRecordsPages()
 		{
-			recordsTotalPages = Math.Max(1,(int)Math.Ceiling((double)filteredRecords.Count / RecordsPerPage));
+			recordsTotalPages = Math.Max(1, (int)Math.Ceiling((double)filteredRecords.Count / RecordsPerPage));
 
 			if (recordsCurrentPage < 0) recordsCurrentPage = 0;
 			if (recordsCurrentPage + 1 > recordsTotalPages) recordsCurrentPage = recordsTotalPages - 1;
@@ -447,8 +447,8 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 				GUI.enabled = record.prefType != PrefsRecord.PrefsType.Unknown;
 
 				if (record.Obscured && !(record.obscuredType == ObscuredPrefs.DataType.String ||
-				                         record.obscuredType == ObscuredPrefs.DataType.Int ||
-				                         record.obscuredType == ObscuredPrefs.DataType.Float))
+										 record.obscuredType == ObscuredPrefs.DataType.Int ||
+										 record.obscuredType == ObscuredPrefs.DataType.Float))
 				{
 					GUI.enabled = false;
 					EditorGUILayout.TextField(record.Key, GUILayout.MaxWidth(200), GUILayout.MinWidth(50));
@@ -458,7 +458,7 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 				{
 					record.Key = EditorGUILayout.TextField(record.Key, GUILayout.MaxWidth(200), GUILayout.MinWidth(50));
 				}
-				
+
 				if ((record.prefType == PrefsRecord.PrefsType.String && !record.Obscured) || (record.Obscured && record.obscuredType == ObscuredPrefs.DataType.String))
 				{
 					// to avoid TextMeshGenerator error because of too much characters
@@ -603,7 +603,7 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 				var keyName = keys[i];
 				if (showProgress)
 				{
-					if (EditorUtility.DisplayCancelableProgressBar("Reading PlayerPrefs [" + (i + 1) + " of " + keysCount + "]", "Reading " + keyName, (float)i/keysCount))
+					if (EditorUtility.DisplayCancelableProgressBar("Reading PlayerPrefs [" + (i + 1) + " of " + keysCount + "]", "Reading " + keyName, (float)i / keysCount))
 					{
 						break;
 					}
@@ -748,7 +748,7 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 			Obscurance = 10
 		}
 
-#region PrefsRecord
+		#region PrefsRecord
 
 		// ----------------------------------------------------------------------------
 		// PrefsRecord class
@@ -1230,7 +1230,7 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 
 			private bool IsValueObscured(string value)
 			{
-				var validBase64String = (value.Length%4 == 0) && Regex.IsMatch(value, @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.None);
+				var validBase64String = (value.Length % 4 == 0) && Regex.IsMatch(value, @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.None);
 				if (!validBase64String) return false;
 
 				var dataType = ObscuredPrefs.GetRawValueType(value);
@@ -1252,7 +1252,7 @@ namespace CodeStage.AntiCheat.EditorCode.Windows
 				Float
 			}
 		}
-#endregion
+		#endregion
 	}
 }
 #endif

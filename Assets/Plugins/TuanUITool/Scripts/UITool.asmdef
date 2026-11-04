@@ -4,7 +4,9 @@
     "references": [
         "AYellowpaper.SerializeInterfaces",
         "UniTask",
-        "DOTweenPro.Scripts"
+        "DOTweenPro.Scripts",
+        "Unity.TextMeshPro",
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

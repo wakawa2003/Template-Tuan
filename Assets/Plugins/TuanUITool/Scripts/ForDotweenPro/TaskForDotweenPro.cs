@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using R3;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -13,23 +12,26 @@ namespace UITool.Popup
     [AddComponentMenu("UI manager/Task For Dotween Pro")]
     public class TaskForDotweenPro : MonoBehaviour, IUITask
     {
+        [field: SerializeField]
         public virtual string Description { get; set; }
+        protected virtual string DefaultDescription => "Tween Animation";
 
         [Header("Gameobject to active")]
         [SerializeField] private GameObject activeObject;
-        protected virtual bool isActiveOnExecute { get; set; } = true;
+        protected virtual bool isActiveOnExecute => true;
 
         [Header("Tween to run")]
-        [SerializeField] private DOTweenAnimation[] dotweenAnimationComponent;
-        protected virtual bool isRunBackwards { get; set; } = true;
+        [SerializeField] private DotweenAnimations[] dotweenAnimationComponent;
+        protected virtual bool isRunBackwards => true;
 
         bool isInit = false;
 
-        void Reset()
+        protected virtual void Reset()
         {
+            Description = DefaultDescription;
             activeObject = gameObject;
-            dotweenAnimationComponent = new DOTweenAnimation[] { };
-            foreach (var item in GetComponentsInChildren<DOTweenAnimation>(true))
+            // dotweenAnimationComponent = new DotweenAnimations[] { };
+            foreach (var item in GetComponentsInChildren<DotweenAnimations>(true))
             {
                 if (!dotweenAnimationComponent.Contains(item))
                 {
@@ -50,8 +52,8 @@ namespace UITool.Popup
             if (activeObject == null)
                 activeObject = gameObject;
 
-            if (dotweenAnimationComponent.Count() == 0)
-                dotweenAnimationComponent = GetComponents<DOTweenAnimation>();
+            // if (dotweenAnimationComponent.Count() == 0)
+            //     dotweenAnimationComponent = GetComponents<DotweenAnimations>();
 
             if (isActiveOnExecute)
                 activeObject.SetActive(false);
@@ -64,65 +66,94 @@ namespace UITool.Popup
 
                 Init();
                 // await UniTask.DelayFrame(2, cancellationToken: cancellationToken);
-                Debug.Log($"Execute: {isActiveOnExecute} {isRunBackwards}");
+                // Debug.Log($"Execute: {isActiveOnExecute} {isRunBackwards}");
+
+                List<UniTask> tasks = new();
+                List<DotweenAnimations> animationsToPlay = new();
+
+                foreach (var item in dotweenAnimationComponent)
+                {
+                    if (item == null)
+                    {
+                        Debug.LogError($"{nameof(TaskForDotweenPro)} on '{name}' has an empty animation entry.", this);
+                        continue;
+                    }
+
+                    item.CreateTween(true, false);
+                    Tween tween = item.tween;
+                    if (tween == null || !tween.active)
+                    {
+                        Debug.LogError(
+                            $"Dotween animation '{item.name}' could not create a tween. Check its Animation Type, Target Component, and validity in the Inspector.",
+                            item);
+                        continue;
+                    }
+
+                    tween.Pause();
+                    bool isCompleted = false;
+                    tween.onComplete += OnComplete;
+                    tween.onRewind += OnComplete;
+
+                    animationsToPlay.Add(item);
+                    tasks.Add(WaitForCompletion());
+
+                    void OnComplete()
+                    {
+                        isCompleted = true;
+                        tween.onComplete -= OnComplete;
+                        tween.onRewind -= OnComplete;
+                    }
+
+                    async UniTask WaitForCompletion()
+                    {
+                        try
+                        {
+                            await UniTask.WaitUntil(() => isCompleted, cancellationToken: cancellationToken);
+                        }
+                        finally
+                        {
+                            tween.onComplete -= OnComplete;
+                            tween.onRewind -= OnComplete;
+                        }
+                    }
+                }
 
                 if (isActiveOnExecute)
                     activeObject.SetActive(true);
 
-                List<UniTask> tasks = new();
-
-                foreach (var item in dotweenAnimationComponent)
+                foreach (var item in animationsToPlay)
                 {
-                    item.CreateTween(false, false);
+                    Tween tween = item.tween;
                     if (isRunBackwards)
                     {
-                        item.DOPlayBackwards();
+                        tween.PlayBackwards();
                         item.easeCurve = item.easeCurve.InvertX();
                     }
                     else
                     {
-                        item.DORestart();
-                        Observable.TimerFrame(1).Subscribe(_ =>
-                        {
-                            item.DORestart(fromHere: true);
-                        });
-                    }
-
-                    // var tweenCompleted = Observable.FromEvent<TweenCallback, Unit>(
-                    //     h => () => h(Unit.Default),   // convert Action -> Unit
-                    //     h => item.tween.onComplete += h,
-                    //     h => item.tween.onComplete -= h
-                    // );
-                    // await tweenCompleted.ToUniTask(cancellationToken: cancellationToken);
-                    // Observable.FromEvent(() => item.tween.onComplete, h => item.tween.onComplete += h, h => item.tween.onComplete -= h)
-
-                    bool isCOmpleted = false;
-                    item.tween.onComplete -= _onComplete;
-                    item.tween.onRewind -= _onComplete;
-                    item.tween.onComplete += _onComplete;
-                    item.tween.onRewind += _onComplete;
-
-                    tasks.Add(UniTask.WaitUntil(() => isCOmpleted, cancellationToken: cancellationToken));
-
-                    void _onComplete()
-                    {
-                        // Debug.Log($"Complete: {item.name}");
-                        isCOmpleted = true;
-                        item.tween.onComplete -= _onComplete;
-                        item.tween.onRewind -= _onComplete;
+                        tasks.Add(RestartTweenFromCurrentPositionNextFrame(item, cancellationToken));
                     }
                 }
 
                 await UniTask.WhenAll(tasks);
                 if (!isActiveOnExecute)
                     activeObject.SetActive(false);
-                Debug.Log($"Complete open task");
+                // Debug.Log($"Complete open task");
             }
             catch (System.Exception e)
             {
                 Debug.LogException(e);
             }
             await UniTask.CompletedTask;
+        }
+
+        static async UniTask RestartTweenFromCurrentPositionNextFrame(
+            DotweenAnimations animation,
+            CancellationToken cancellationToken)
+        {
+            await UniTask.NextFrame(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            animation.DORestartThisTween(fromHere: true);
         }
 
         [Button]

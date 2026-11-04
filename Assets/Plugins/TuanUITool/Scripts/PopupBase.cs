@@ -62,6 +62,11 @@ namespace UITool.Popup
             IsShowing = false;
         }
 
+        public void HideFromButton()
+        {
+            Hide().Forget();
+        }
+
 
         public async UniTask Show(object payloadData)
         {

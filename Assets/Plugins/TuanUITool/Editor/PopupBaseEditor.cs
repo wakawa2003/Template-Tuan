@@ -3,6 +3,8 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
+using UnityEngine.UI;
+
 #if UNITY_EDITOR
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector.Editor;
@@ -203,7 +205,17 @@ namespace UITool.Popup.Editor
                     targetObject.transform);
 
                 newObject.name = child.name;
+
+                //gán nút targetObject.Hide() khi ấn vào bg
+                var buttonClose = newObject.GetComponent<Button>();
+                if (buttonClose != null)
+                {
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(
+                        buttonClose.onClick,
+                        targetObject.HideFromButton);
+                }
             }
+
 
             targetObject.Reset();
         }

@@ -186,7 +186,7 @@ namespace UITool.Popup.Editor
                 nameof(SpawnDefaultPopupUseDotween));
 
             var prefabs = Resources.Load<GameObject>(
-                "UI Tool Templete/Popup Templete use Dotween Pro");
+                "UI Tool Templete/Popup Templete use Dotween");
 
             if (prefabs == null)
             {

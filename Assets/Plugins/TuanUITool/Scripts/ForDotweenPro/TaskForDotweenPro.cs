@@ -12,23 +12,22 @@ namespace UITool.Popup
     [AddComponentMenu("UI manager/Task For Dotween Pro")]
     public class TaskForDotweenPro : MonoBehaviour, IUITask
     {
-        [field: SerializeField]
-        public virtual string Description { get; set; }
+
+
         protected virtual string DefaultDescription => "Tween Animation";
 
         [Header("Gameobject to active")]
         [SerializeField] private GameObject activeObject;
-        protected virtual bool isActiveOnExecute => true;
+        public virtual bool IsActiveOnExecute => true;
 
         [Header("Tween to run")]
         [SerializeField] private DotweenAnimations[] dotweenAnimationComponent;
-        protected virtual bool isRunBackwards => true;
+        public virtual bool IsRunBackwards => true;
 
         bool isInit = false;
 
         protected virtual void Reset()
         {
-            Description = DefaultDescription;
             activeObject = gameObject;
             // dotweenAnimationComponent = new DotweenAnimations[] { };
             foreach (var item in GetComponentsInChildren<DotweenAnimations>(true))
@@ -55,7 +54,7 @@ namespace UITool.Popup
             // if (dotweenAnimationComponent.Count() == 0)
             //     dotweenAnimationComponent = GetComponents<DotweenAnimations>();
 
-            if (isActiveOnExecute)
+            if (IsActiveOnExecute)
                 activeObject.SetActive(false);
         }
 
@@ -83,8 +82,14 @@ namespace UITool.Popup
                     Tween tween = item.tween;
                     if (tween == null || !tween.active)
                     {
+                        string targetType = item.target != null
+                            ? item.target.GetType().Name
+                            : "None";
                         Debug.LogError(
-                            $"Dotween animation '{item.name}' could not create a tween. Check its Animation Type, Target Component, and validity in the Inspector.",
+                            $"Dotween animation '{item.name}' could not create a tween " +
+                            $"(isValid: {item.isValid}, animation: {item.animationType}, " +
+                            $"target: {targetType}, configured target type: {item.targetType}). " +
+                            "Check that the Target Component matches the configured target type.",
                             item);
                         continue;
                     }
@@ -118,13 +123,13 @@ namespace UITool.Popup
                     }
                 }
 
-                if (isActiveOnExecute)
+                if (IsActiveOnExecute)
                     activeObject.SetActive(true);
 
                 foreach (var item in animationsToPlay)
                 {
                     Tween tween = item.tween;
-                    if (isRunBackwards)
+                    if (IsRunBackwards)
                     {
                         tween.PlayBackwards();
                         item.easeCurve = item.easeCurve.InvertX();
@@ -136,7 +141,7 @@ namespace UITool.Popup
                 }
 
                 await UniTask.WhenAll(tasks);
-                if (!isActiveOnExecute)
+                if (!IsActiveOnExecute)
                     activeObject.SetActive(false);
                 // Debug.Log($"Complete open task");
             }
@@ -160,14 +165,14 @@ namespace UITool.Popup
         public void ForceRunEnd()
         {
             Init();
-            if (isActiveOnExecute)
+            if (IsActiveOnExecute)
                 activeObject.SetActive(true);
             foreach (var item in dotweenAnimationComponent)
             {
                 item.CreateTween(false, false);
                 item.DOComplete(false);
             }
-            if (!isActiveOnExecute)
+            if (!IsActiveOnExecute)
                 activeObject.SetActive(false);
         }
     }

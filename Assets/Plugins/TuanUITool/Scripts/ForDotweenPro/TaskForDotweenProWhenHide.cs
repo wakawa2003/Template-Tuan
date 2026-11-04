@@ -1,9 +1,12 @@
+using UnityEngine;
+
 namespace UITool.Popup
 {
+    [DisallowMultipleComponent]
     public class TaskForDotweenProWhenHide : TaskForDotweenPro, IUITaskClose
     {
         protected override string DefaultDescription => "Hide Tween Animation";
-        protected override bool isActiveOnExecute => false;
-        protected override bool isRunBackwards => false;
+        public override bool IsActiveOnExecute => false;
+        public override bool IsRunBackwards => false;
     }
 }

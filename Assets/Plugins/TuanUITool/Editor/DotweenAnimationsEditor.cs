@@ -54,6 +54,14 @@ namespace UITool.Popup.Editor
 
         void OnEnable()
         {
+            if (!HasValidTargets())
+                return;
+
+            CacheProperties();
+        }
+
+        void CacheProperties()
+        {
             animationType = serializedObject.FindProperty("animationType");
             targetIsSelf = serializedObject.FindProperty("targetIsSelf");
             targetGO = serializedObject.FindProperty("targetGO");
@@ -68,7 +76,33 @@ namespace UITool.Popup.Editor
 
         public override void OnInspectorGUI()
         {
+            if (!HasValidTargets())
+            {
+                EditorGUILayout.HelpBox("The animation target was destroyed or is no longer available.", MessageType.Warning);
+                return;
+            }
+
+            if (animationType == null)
+                CacheProperties();
+
+            if (animationType == null || targetIsSelf == null || targetGO == null
+                || animationTarget == null || targetType == null || forcedTargetType == null
+                || isValid == null || useTargetAsV3 == null || easeType == null || easeCurve == null)
+            {
+                EditorGUILayout.HelpBox("The animation component is missing required serialized fields.", MessageType.Error);
+                return;
+            }
+
             serializedObject.Update();
+
+            var anim = target as DotweenAnimations;
+            string detail = anim != null ? anim.Detail : "";
+            string displayName = string.IsNullOrEmpty(detail)
+                ? "Dotween Animations"
+                : $"Dotween Animations - {detail}";
+
+            EditorGUILayout.LabelField(displayName, EditorStyles.boldLabel);
+            EditorGUILayout.Space();
 
             DrawDetail();
             DrawActivation();
@@ -81,9 +115,40 @@ namespace UITool.Popup.Editor
             serializedObject.ApplyModifiedProperties();
         }
 
+        bool HasValidTargets()
+        {
+            var editorTargets = targets;
+            if (editorTargets == null || editorTargets.Length == 0)
+                return false;
+
+            foreach (var editorTarget in editorTargets)
+            {
+                if (editorTarget == null)
+                    return false;
+            }
+
+            return true;
+        }
+
+        void DrawProperty(SerializedProperty property, GUIContent label = null, bool includeChildren = false)
+        {
+            if (property == null)
+                return;
+
+            if (label == null)
+                EditorGUILayout.PropertyField(property, includeChildren);
+            else
+                EditorGUILayout.PropertyField(property, label, includeChildren);
+        }
+
+        void DrawProperty(string propertyName, GUIContent label = null, bool includeChildren = false)
+        {
+            DrawProperty(serializedObject.FindProperty(propertyName), label, includeChildren);
+        }
+
         void DrawDetail()
         {
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("Detail"),
+            DrawProperty(serializedObject.FindProperty("Detail"),
                 new GUIContent("Detail"));
             EditorGUILayout.Space();
         }
@@ -91,9 +156,9 @@ namespace UITool.Popup.Editor
         void DrawActivation()
         {
             EditorGUILayout.LabelField("Animation", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("isActive"), new GUIContent("Active"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("autoGenerate"), new GUIContent("Auto Generate"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("autoPlay"), new GUIContent("Auto Play"));
+            DrawProperty(serializedObject.FindProperty("isActive"), new GUIContent("Active"));
+            DrawProperty(serializedObject.FindProperty("autoGenerate"), new GUIContent("Auto Generate"));
+            DrawProperty(serializedObject.FindProperty("autoPlay"), new GUIContent("Auto Play"));
             DrawEnumPopup(animationType, AnimationLabels, "Animation Type");
         }
 
@@ -101,14 +166,14 @@ namespace UITool.Popup.Editor
         {
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Target", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(targetIsSelf, new GUIContent("Animate This GameObject"));
+            DrawProperty(targetIsSelf, new GUIContent("Animate This GameObject"));
 
             if (!targetIsSelf.boolValue)
-                EditorGUILayout.PropertyField(targetGO, new GUIContent("Target GameObject"));
+                DrawProperty(targetGO, new GUIContent("Target GameObject"));
 
-            EditorGUILayout.PropertyField(animationTarget, new GUIContent("Target Component"));
+            DrawProperty(animationTarget, new GUIContent("Target Component"));
             DrawFadeTargetSelector();
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("tweenTargetIsTargetGO"),
+            DrawProperty(serializedObject.FindProperty("tweenTargetIsTargetGO"),
                 new GUIContent("Use Target GameObject for Group Operations"));
 
             var component = animationTarget.objectReferenceValue as Component;
@@ -138,7 +203,7 @@ namespace UITool.Popup.Editor
                     != DotweenAnimations.AnimationType.Fade)
                 return;
 
-            var owner = serializedObject.targetObject as DotweenAnimations;
+            var owner = target as DotweenAnimations;
             var gameObject = targetIsSelf.boolValue
                 ? (owner != null ? owner.gameObject : null)
                 : targetGO.objectReferenceValue as GameObject;
@@ -168,24 +233,27 @@ namespace UITool.Popup.Editor
         {
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Tween Settings", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("duration"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("delay"));
+            DrawProperty(serializedObject.FindProperty("duration"));
+            DrawProperty(serializedObject.FindProperty("delay"));
             DrawEnumPopup(easeType, EaseLabels, "Ease");
             if (easeType.enumValueIndex == (int)Ease.INTERNAL_Custom)
-                EditorGUILayout.PropertyField(easeCurve, new GUIContent("Ease Curve"));
+                DrawProperty(easeCurve, new GUIContent("Ease Curve"));
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("loopType"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("loops"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("id"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("isRelative"));
+            DrawProperty(serializedObject.FindProperty("loopType"));
+            DrawProperty(serializedObject.FindProperty("loops"));
+            DrawProperty(serializedObject.FindProperty("id"));
+            DrawProperty(serializedObject.FindProperty("isRelative"));
             var hasStartValue = serializedObject.FindProperty("hasStartValue");
-            using (new EditorGUI.DisabledScope(hasStartValue.boolValue))
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("isFrom"));
-            if (hasStartValue.boolValue)
-                EditorGUILayout.HelpBox("Custom start and end values are absolute; Relative and From are ignored.", MessageType.Info);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("isSpeedBased"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("isIndependentUpdate"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("autoKill"));
+            if (hasStartValue != null)
+            {
+                using (new EditorGUI.DisabledScope(hasStartValue.boolValue))
+                    DrawProperty(serializedObject.FindProperty("isFrom"));
+                if (hasStartValue.boolValue)
+                    EditorGUILayout.HelpBox("Custom start and end values are absolute; Relative and From are ignored.", MessageType.Info);
+            }
+            DrawProperty(serializedObject.FindProperty("isSpeedBased"));
+            DrawProperty(serializedObject.FindProperty("isIndependentUpdate"));
+            DrawProperty(serializedObject.FindProperty("autoKill"));
         }
 
         void DrawEndValue()
@@ -202,22 +270,22 @@ namespace UITool.Popup.Editor
             switch (type)
             {
                 case DotweenAnimations.AnimationType.Move:
-                    EditorGUILayout.PropertyField(useTargetAsV3, new GUIContent("Use Transform as Target"));
-                    if (useTargetAsV3.boolValue)
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty("endValueTransform"),
+                    DrawProperty(useTargetAsV3, new GUIContent("Use Transform as Target"));
+                    if (useTargetAsV3 != null && useTargetAsV3.boolValue)
+                        DrawProperty(serializedObject.FindProperty("endValueTransform"),
                             new GUIContent("End Transform (B)"));
                     else
                         DrawVector3();
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("snapping"));
+                    DrawProperty(serializedObject.FindProperty("snapping"));
                     break;
                 case DotweenAnimations.AnimationType.LocalMove:
                     DrawVector3();
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("snapping"));
+                    DrawProperty(serializedObject.FindProperty("snapping"));
                     break;
                 case DotweenAnimations.AnimationType.Rotate:
                 case DotweenAnimations.AnimationType.LocalRotate:
                     DrawVector3();
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("rotationMode"),
+                    DrawProperty(serializedObject.FindProperty("rotationMode"),
                         new GUIContent("Rotation Mode"));
                     break;
                 case DotweenAnimations.AnimationType.Scale:
@@ -225,27 +293,29 @@ namespace UITool.Popup.Editor
                     break;
                 case DotweenAnimations.AnimationType.Color:
                 case DotweenAnimations.AnimationType.CameraBackgroundColor:
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("endValueColor"),
+                    DrawProperty(serializedObject.FindProperty("endValueColor"),
                         new GUIContent("End Color (B)"));
                     break;
                 case DotweenAnimations.AnimationType.Fade:
                 case DotweenAnimations.AnimationType.CameraAspect:
                 case DotweenAnimations.AnimationType.CameraFieldOfView:
                 case DotweenAnimations.AnimationType.CameraOrthoSize:
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("endValueFloat"),
+                    DrawProperty(serializedObject.FindProperty("endValueFloat"),
                         new GUIContent(type == DotweenAnimations.AnimationType.Fade
                             ? "End Alpha / Intensity (B)"
                             : "End Value (B)"));
                     break;
                 case DotweenAnimations.AnimationType.Text:
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("endValueString"),
+                    DrawProperty(serializedObject.FindProperty("endValueString"),
                         new GUIContent("End Text (B)"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("richTextEnabled"),
+                    DrawProperty(serializedObject.FindProperty("richTextEnabled"),
                         new GUIContent("Rich Text Enabled"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("scrambleMode"),
+                    DrawProperty(serializedObject.FindProperty("scrambleMode"),
                         new GUIContent("Scramble Mode"));
-                    if ((ScrambleMode)serializedObject.FindProperty("scrambleMode").enumValueIndex != ScrambleMode.None)
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty("customScrambleCharacters"),
+                    var scrambleMode = serializedObject.FindProperty("scrambleMode");
+                    if (scrambleMode != null
+                        && (ScrambleMode)scrambleMode.enumValueIndex != ScrambleMode.None)
+                        DrawProperty(serializedObject.FindProperty("customScrambleCharacters"),
                             new GUIContent("Custom Scramble Characters"));
                     break;
                 case DotweenAnimations.AnimationType.PunchPosition:
@@ -268,7 +338,7 @@ namespace UITool.Popup.Editor
                     break;
                 case DotweenAnimations.AnimationType.CameraPixelRect:
                 case DotweenAnimations.AnimationType.CameraRect:
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("endValueRect"),
+                    DrawProperty(serializedObject.FindProperty("endValueRect"),
                         new GUIContent("End Rect (B)"));
                     break;
                 case DotweenAnimations.AnimationType.UIWidthHeight:
@@ -283,72 +353,74 @@ namespace UITool.Popup.Editor
                 return;
 
             var hasStartValue = serializedObject.FindProperty("hasStartValue");
-            EditorGUILayout.PropertyField(hasStartValue, new GUIContent("Set Start Value (A)"));
-            if (!hasStartValue.boolValue)
+            DrawProperty(hasStartValue, new GUIContent("Set Start Value (A)"));
+            if (hasStartValue == null || !hasStartValue.boolValue)
                 return;
 
             switch (type)
             {
                 case DotweenAnimations.AnimationType.Move:
                 case DotweenAnimations.AnimationType.LocalMove:
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueV3"),
+                    DrawProperty(serializedObject.FindProperty("startValueV3"),
                         new GUIContent("Start Position (A)"));
                     break;
                 case DotweenAnimations.AnimationType.Rotate:
                     if ((DotweenAnimations.TargetType)targetType.enumValueIndex
                         == DotweenAnimations.TargetType.Rigidbody2D)
                     {
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueFloat"),
+                        DrawProperty(serializedObject.FindProperty("startValueFloat"),
                             new GUIContent("Start Angle (A)"));
                     }
                     else
                     {
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueV3"),
+                        DrawProperty(serializedObject.FindProperty("startValueV3"),
                             new GUIContent("Start Rotation (A)"));
                     }
                     break;
                 case DotweenAnimations.AnimationType.LocalRotate:
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueV3"),
+                    DrawProperty(serializedObject.FindProperty("startValueV3"),
                         new GUIContent("Start Rotation (A)"));
                     break;
                 case DotweenAnimations.AnimationType.Scale:
-                    if (serializedObject.FindProperty("useUniformScale").boolValue)
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueFloat"),
+                    var useUniformScale = serializedObject.FindProperty("useUniformScale");
+                    if (useUniformScale != null && useUniformScale.boolValue)
+                        DrawProperty(serializedObject.FindProperty("startValueFloat"),
                             new GUIContent("Start Scale (A)"));
                     else
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueV3"),
+                        DrawProperty(serializedObject.FindProperty("startValueV3"),
                             new GUIContent("Start Scale (A)"));
                     break;
                 case DotweenAnimations.AnimationType.UIWidthHeight:
-                    if (serializedObject.FindProperty("useUniformSize").boolValue)
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueFloat"),
+                    var useUniformSize = serializedObject.FindProperty("useUniformSize");
+                    if (useUniformSize != null && useUniformSize.boolValue)
+                        DrawProperty(serializedObject.FindProperty("startValueFloat"),
                             new GUIContent("Start Size (A)"));
                     else
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueV2"),
+                        DrawProperty(serializedObject.FindProperty("startValueV2"),
                             new GUIContent("Start Size (A)"));
                     break;
                 case DotweenAnimations.AnimationType.Color:
                 case DotweenAnimations.AnimationType.CameraBackgroundColor:
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueColor"),
+                    DrawProperty(serializedObject.FindProperty("startValueColor"),
                         new GUIContent("Start Color (A)"));
                     break;
                 case DotweenAnimations.AnimationType.Fade:
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueFloat"),
+                    DrawProperty(serializedObject.FindProperty("startValueFloat"),
                         new GUIContent("Start Alpha / Intensity (A)"));
                     break;
                 case DotweenAnimations.AnimationType.Text:
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueString"),
+                    DrawProperty(serializedObject.FindProperty("startValueString"),
                         new GUIContent("Start Text (A)"));
                     break;
                 case DotweenAnimations.AnimationType.CameraAspect:
                 case DotweenAnimations.AnimationType.CameraFieldOfView:
                 case DotweenAnimations.AnimationType.CameraOrthoSize:
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueFloat"),
+                    DrawProperty(serializedObject.FindProperty("startValueFloat"),
                         new GUIContent("Start Value (A)"));
                     break;
                 case DotweenAnimations.AnimationType.CameraPixelRect:
                 case DotweenAnimations.AnimationType.CameraRect:
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("startValueRect"),
+                    DrawProperty(serializedObject.FindProperty("startValueRect"),
                         new GUIContent("Start Rect (A)"));
                     break;
             }
@@ -394,7 +466,7 @@ namespace UITool.Popup.Editor
 
         void DrawRuntimeControls()
         {
-            var component = serializedObject.targetObject as DotweenAnimations;
+            var component = target as DotweenAnimations;
             if (!Application.isPlaying || component == null)
                 return;
 
@@ -428,7 +500,7 @@ namespace UITool.Popup.Editor
             if (animation == DotweenAnimations.AnimationType.None)
                 return;
 
-            var owner = serializedObject.targetObject as DotweenAnimations;
+            var owner = target as DotweenAnimations;
             if (owner == null)
                 return;
 
@@ -451,6 +523,9 @@ namespace UITool.Popup.Editor
 
         static DotweenAnimations.TargetType GetTargetType(Component component)
         {
+            if (component == null)
+                return DotweenAnimations.TargetType.Unset;
+
             if (component is TextMeshProUGUI)
                 return DotweenAnimations.TargetType.TextMeshProUGUI;
             if (component is TextMeshPro)
@@ -468,16 +543,16 @@ namespace UITool.Popup.Editor
 
         void DrawVector3()
         {
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("endValueV3"), new GUIContent("End Value (B)"));
+            DrawProperty(serializedObject.FindProperty("endValueV3"), new GUIContent("End Value (B)"));
         }
 
         void DrawUniformOrVector3()
         {
             var useUniform = serializedObject.FindProperty("useUniformScale");
-            EditorGUILayout.PropertyField(useUniform,
+            DrawProperty(useUniform,
                 new GUIContent("Use Uniform Scale"));
-            if (useUniform.boolValue)
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("endValueFloat"), new GUIContent("End Scale (B)"));
+            if (useUniform != null && useUniform.boolValue)
+                DrawProperty(serializedObject.FindProperty("endValueFloat"), new GUIContent("End Scale (B)"));
             else
                 DrawVector3();
         }
@@ -485,47 +560,50 @@ namespace UITool.Popup.Editor
         void DrawUniformOrVector2()
         {
             var useUniform = serializedObject.FindProperty("useUniformSize");
-            EditorGUILayout.PropertyField(useUniform,
+            DrawProperty(useUniform,
                 new GUIContent("Use Uniform Size"));
-            if (useUniform.boolValue)
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("endValueFloat"), new GUIContent("End Size (B)"));
+            if (useUniform != null && useUniform.boolValue)
+                DrawProperty(serializedObject.FindProperty("endValueFloat"), new GUIContent("End Size (B)"));
             else
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("endValueV2"), new GUIContent("End Size (B)"));
+                DrawProperty(serializedObject.FindProperty("endValueV2"), new GUIContent("End Size (B)"));
         }
 
         void DrawPunchOptions(bool includeSnapping)
         {
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("vibrato"), new GUIContent("Vibrato"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("punchElasticity"), new GUIContent("Elasticity"));
+            DrawProperty(serializedObject.FindProperty("vibrato"), new GUIContent("Vibrato"));
+            DrawProperty(serializedObject.FindProperty("punchElasticity"), new GUIContent("Elasticity"));
             if (includeSnapping)
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("punchSnapping"),
+                DrawProperty(serializedObject.FindProperty("punchSnapping"),
                     new GUIContent("Snapping"));
         }
 
         void DrawShakeOptions(bool includePositionOptions)
         {
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("vibrato"), new GUIContent("Vibrato"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("shakeRandomness"), new GUIContent("Randomness"));
+            DrawProperty(serializedObject.FindProperty("vibrato"), new GUIContent("Vibrato"));
+            DrawProperty(serializedObject.FindProperty("shakeRandomness"), new GUIContent("Randomness"));
             if (includePositionOptions)
             {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("shakeSnapping"),
+                DrawProperty(serializedObject.FindProperty("shakeSnapping"),
                     new GUIContent("Snapping"));
             }
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("shakeFadeOut"), new GUIContent("Fade Out"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("shakeRandomnessMode"),
+            DrawProperty(serializedObject.FindProperty("shakeFadeOut"), new GUIContent("Fade Out"));
+            DrawProperty(serializedObject.FindProperty("shakeRandomnessMode"),
                 new GUIContent("Randomness Mode"));
         }
 
         void DrawEvent(string enabledField, string eventField, string label)
         {
             var enabled = serializedObject.FindProperty(enabledField);
-            EditorGUILayout.PropertyField(enabled, new GUIContent(label));
-            if (enabled.boolValue)
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(eventField), GUIContent.none, true);
+            DrawProperty(enabled, new GUIContent(label));
+            if (enabled != null && enabled.boolValue)
+                DrawProperty(serializedObject.FindProperty(eventField), GUIContent.none, true);
         }
 
         void DrawEnumPopup(SerializedProperty property, GUIContent[] labels, string label)
         {
+            if (property == null || labels == null || labels.Length == 0)
+                return;
+
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.PrefixLabel(label);

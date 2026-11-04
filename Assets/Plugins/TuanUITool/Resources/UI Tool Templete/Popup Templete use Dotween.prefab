@@ -959,7 +959,7 @@ MonoBehaviour:
   autoPlay: 0
   useTargetAsV3: 0
   hasStartValue: 1
-  endValueFloat: 0.8
+  endValueFloat: 1
   endValueV3: {x: 0, y: 0, z: 0}
   endValueV2: {x: 0, y: 0}
   endValueColor: {r: 1, g: 1, b: 1, a: 1}
@@ -1102,7 +1102,7 @@ MonoBehaviour:
     width: 0
     height: 0
   endValueTransform: {fileID: 0}
-  startValueFloat: 0.8
+  startValueFloat: 1
   startValueV3: {x: 0, y: 0, z: 0}
   startValueV2: {x: 0, y: 0}
   startValueColor: {r: 1, g: 1, b: 1, a: 1}

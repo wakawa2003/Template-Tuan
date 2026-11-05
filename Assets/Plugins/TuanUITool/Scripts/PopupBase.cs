@@ -36,7 +36,7 @@ namespace UITool.Popup
             }
         }
 
-        public async UniTask Hide()
+        public virtual async UniTask Hide()
         {
             try
             {
@@ -49,6 +49,7 @@ namespace UITool.Popup
                     tasks.Add(task.Value.Execute(destroyCancellationToken));
                     // Debug.Log($"run {task.Value}");
                 }
+                await OnBeforeHide();
                 await UniTask.WhenAll(tasks);
                 await OnCompleteHide();
 
@@ -68,7 +69,7 @@ namespace UITool.Popup
         }
 
 
-        public async UniTask Show(object payloadData)
+        public virtual async UniTask Show(object payloadData)
         {
             try
             {
@@ -80,6 +81,7 @@ namespace UITool.Popup
                     tasks.Add(task.Value.Execute(destroyCancellationToken));
                     // Debug.Log($"run {task.Value}");
                 }
+                await OnBeforeShow(payloadData);
                 await UniTask.WhenAll(tasks);
                 await OnCompleteShow(payloadData);
 
@@ -92,7 +94,33 @@ namespace UITool.Popup
             }
         }
 
-        public abstract UniTask OnCompleteShow(object payloadData);
+        /// <summary>
+        /// Before Running Anims Show
+        /// </summary>
+        /// <param name="payloadData"></param>
+        /// <returns></returns>
+        public virtual UniTask OnBeforeShow(object payloadData)
+        {
+            return UniTask.CompletedTask;
+        }
+
+
+        /// <summary>
+        /// Before Running Anims Hide
+        /// </summary>
+        /// <returns></returns>
+        public virtual UniTask OnBeforeHide()
+        {
+            return UniTask.CompletedTask;
+
+        }
+
+
+        public virtual UniTask OnCompleteShow(object payloadData)
+        {
+            return UniTask.CompletedTask;
+        }
+
         public virtual UniTask OnCompleteHide()
         {
             return UniTask.CompletedTask;

@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.Localization;
-using UnityEngine.Localization.Settings;
 using TMPro;
 
 

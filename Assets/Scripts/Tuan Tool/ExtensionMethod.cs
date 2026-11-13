@@ -5,45 +5,61 @@ using UnityEngine;
 
 namespace TuanTool
 {
+    /// <summary>
+    /// Extension method dùng chung cho GameObject / Transform.
+    /// </summary>
     public static class ExtensionMethod
     {
+        /// <summary>
+        /// Xoá toàn bộ con trực tiếp của GameObject.
+        /// Trong Play mode dùng Destroy, trong Editor dùng DestroyImmediate.
+        /// </summary>
         public static void DeleteAllChild(this GameObject obj)
         {
             DeleteAllChild(obj, obj);
         }
+
         /// <summary>
-        /// Checks if a GameObject has been destroyed.
+        /// Kiểm tra GameObject đã bị Destroy hay chưa.
         /// </summary>
-        /// <param name="gameObject">GameObject reference to check for destructedness</param>
-        /// <returns>If the game object has been marked as destroyed by UnityEngine</returns>
+        /// <param name="gameObject">GameObject cần kiểm tra</param>
+        /// <returns>True nếu object đã bị UnityEngine đánh dấu destroy</returns>
         public static bool IsDestroyed(this GameObject gameObject)
         {
             // UnityEngine overloads the == opeator for the GameObject type
-            // and returns null when the object has been destroyed, but 
+            // and returns null when the object has been destroyed, but
             // actually the object is still there but has not been cleaned up yet
             // if we test both we can determine if the object has been destroyed.
             return gameObject == null && !ReferenceEquals(gameObject, null);
         }
 
+        /// <summary>
+        /// Xoá tất cả con của transform, trừ <paramref name="exclusive"/>.
+        /// </summary>
         public static void DeleteAllChild(this Transform transform, Transform exclusive)
         {
-
             DeleteAllChild(transform.gameObject, exclusive.gameObject);
         }
 
+        /// <summary>
+        /// Xoá tất cả con của transform.
+        /// </summary>
         public static void DeleteAllChild(this Transform transform)
         {
-
             DeleteAllChild(transform.gameObject);
         }
 
-
+        /// <summary>
+        /// Xoá tất cả con của transform, giữ lại các transform trong <paramref name="exclusive"/>.
+        /// </summary>
         public static void DeleteAllChild(this Transform transform, List<Transform> exclusive)
         {
-
             DeleteAllChild(transform.gameObject, exclusive.ConvertAll(_ => _.gameObject).ToList());
         }
 
+        /// <summary>
+        /// Xoá tất cả con của obj, trừ <paramref name="exclusive"/>.
+        /// </summary>
         public static void DeleteAllChild(this GameObject obj, GameObject exclusive)
         {
             var childrens = new List<GameObject>();
@@ -62,6 +78,9 @@ namespace TuanTool
 
         }
 
+        /// <summary>
+        /// Xoá tất cả con của obj, giữ lại các GameObject trong <paramref name="exclusive"/>.
+        /// </summary>
         public static void DeleteAllChild(this GameObject obj, List<GameObject> exclusive)
         {
 
@@ -77,60 +96,6 @@ namespace TuanTool
                     else
                         Object.DestroyImmediate(item.gameObject);
             }
-        }
-
-
-        public static int FindIndex<T>(this List<T> list, T obj)
-        {
-            int j = -1;
-            for (int i = 0; i < list.Count; i++)
-            {
-                //if (EqualityComparer<T>.Default.Equals(list[i], obj))
-                if (ReferenceEquals(list[i], obj))
-                {
-                    j = i;
-                    break;
-                }
-            }
-
-            if (j != -1)
-                return j;
-            else
-            {
-                Debug.LogError("Khong co phan tu trong mang!");
-                return -1;
-            }
-        }
-
-        // public static System.IObservable<bool> IsAliveAsObservable(this ParticleSystem particle, bool whereBool)
-        // {
-        //     return particle.ObserveEveryValueChanged(_ => _.IsAlive(true) && particle != null).Where(_ => _ == whereBool);
-        // }
-
-        /// <summary>
-        /// Inverts the X axis (time) of an AnimationCurve.
-        /// </summary>
-        public static AnimationCurve InvertX(this AnimationCurve curve)
-        {
-            if (curve == null || curve.length == 0)
-                return new AnimationCurve();
-
-            float maxTime = curve[curve.length - 1].time;
-            Keyframe[] keys = new Keyframe[curve.length];
-
-            for (int i = 0; i < curve.length; i++)
-            {
-                var k = curve[i];
-                float newTime = maxTime - k.time;
-
-                // Đảo chiều tangents để giữ đúng hướng
-                keys[i] = new Keyframe(newTime, k.value, -k.inTangent, -k.outTangent);
-            }
-
-            // Sắp xếp lại key theo time tăng dần
-            System.Array.Sort(keys, (a, b) => a.time.CompareTo(b.time));
-
-            return new AnimationCurve(keys);
         }
     }
 }

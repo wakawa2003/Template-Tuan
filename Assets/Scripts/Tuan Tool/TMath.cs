@@ -24,16 +24,25 @@ namespace TuanTool
             return Mathf.Clamp(b1 + (s - a1) * (b2 - b1) / (a2 - a1), b1, b2);
         }
 
+        /// <summary>
+        /// Ánh xạ s từ khoảng [a1, a2] sang [b1, b2] (không kẹp).
+        /// </summary>
         public static float Remap(float s, float a1, float a2, float b1, float b2)
         {
             return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
         }
 
+        /// <summary>
+        /// Bezier bậc 2 (3 điểm điều khiển), t trong [0, 1].
+        /// </summary>
         public static Vector3 Bezier(float t, Vector3 p0, Vector3 p1, Vector3 p2)
         {
             return (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
         }
 
+        /// <summary>
+        /// Bezier bậc 3 (4 điểm điều khiển), t trong [0, 1].
+        /// </summary>
         public static Vector3 Bezier(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
             return Mathf.Pow(1 - t, 3) * p0 + 3 * (1 - t) * (1 - t) * t * p1 + 3 * (1 - t) * t * t * p2 + Mathf.Pow(t, 3) * p3;
@@ -65,6 +74,9 @@ namespace TuanTool
             // Nếu tia không cắt mặt phẳng (song song hoặc hướng ngược lại)
             return Vector3.zero;
         }
+        /// <summary>
+        /// Giao điểm 2 đường thẳng AB và CD (2D). Trả về (MaxValue, MaxValue) nếu song song.
+        /// </summary>
         public static Vector2 GiaoDiem2DuongThang(Vector2 A, Vector2 B, Vector2 C, Vector2 D)
         {
             // Line AB represented as a1x + b1y = c1  
@@ -168,34 +180,52 @@ namespace TuanTool
             return (-1, -1, 0, 0);
         }
 
+        /// <summary>
+        /// Random số thực trong khoảng (minMax.x, minMax.y).
+        /// </summary>
         public static float RandomMinMax(Vector2 minMax)
         {
             return UnityEngine.Random.Range(minMax.x, minMax.y);
         }
 
+        /// <summary>
+        /// Random theo tỷ lệ phần trăm (số nguyên 0-100).
+        /// </summary>
         public static bool RandomPercent(int percent)
         {
             int t = UnityEngine.Random.Range(1, 101);
             return (t <= percent);
         }
 
+        /// <summary>
+        /// Random theo tỷ lệ phần trăm (số thực 0-100).
+        /// </summary>
         public static bool RandomPercent(float percent)
         {
             float t = UnityEngine.Random.Range(0f, 100f);
             return (t <= percent);
         }
 
+        /// <summary>
+        /// Chọn ngẫu nhiên 1 phần tử trong danh sách tham số.
+        /// </summary>
         public static t RandomSelect<t>(params t[] numbers)
         {
             return numbers[UnityEngine.Random.Range(0, numbers.Length)];
 
         }
 
+        /// <summary>
+        /// Chọn ngẫu nhiên 1 phần tử trong List.
+        /// </summary>
         public static t RandomSelect<t>(List<t> numbers)
         {
             return numbers[UnityEngine.Random.Range(0, numbers.Count)];
         }
 
+        /// <summary>
+        /// Chọn ngẫu nhiên 1 giá trị của enum.
+        /// </summary>
         public static t RandomEnum<t>() where t : Enum
         {
             var a = Enum.GetValues(typeof(t));
@@ -288,11 +318,14 @@ namespace TuanTool
         }
 
 
+
+        /// <summary>
+        /// AnimationCurve đường thẳng từ (0,0) đến (1,1).
+        /// </summary>
         public static AnimationCurve AnimationCurve_Linear01()
         {
             return AnimationCurve.Linear(0.0f, 0.0f, 1, 1);
         }
-
 
         /// <summary>
         /// Same with Mathf.Sign() but have return 0.
@@ -301,6 +334,9 @@ namespace TuanTool
         {
             return System.Math.Sign(t);
         }
+        /// <summary>
+        /// Dấu của số thực (-1, 0, 1). Giống Mathf.Sign nhưng trả về int và 0 khi t = 0.
+        /// </summary>
         public static int Sign(float t)
         {
             return System.Math.Sign(t);
@@ -412,7 +448,6 @@ namespace TuanTool
 
             return localPoint;
         }
-
 
         /// <summary>
         /// Trả về Normalize của 4 góc Rect A so với 4 góc của Rect B (ứng dụng trong xác định scrollRect.verticalNormalizedPosition).

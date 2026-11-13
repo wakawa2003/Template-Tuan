@@ -1,23 +1,34 @@
 using System;
 using UnityEngine;
-using UnityEngine.Localization;
 
 namespace TuanTool
 {
     /// <summary>
-    /// Dùng (Use()) đến số lần tối đa, 
+    /// Dùng (Use()) đến số lần tối đa,
     ///  đến 00:00 UTC hằng ngày sẽ reset về MaximumUse.
+    /// <br>Yêu cầu: project phải tự cung cấp <see cref="ISaveLoad"/> truyền vào constructor.</br>
     /// </summary>
     [System.Serializable]
     public class UsageRegeneratorDaily
     {
+        /// <summary>Key lưu số lượt còn lại.</summary>
         private string saveKeyRemaining;
+        /// <summary>Key lưu mốc reset gần nhất (UTC, FileTimeUtc).</summary>
         private string saveKeyLastDepleted;
 
+        /// <summary>Số lượt tối đa mỗi ngày.</summary>
         public int MaximumUse { get; private set; }
         private Func<DateTime> getCurrentTimeUTC;
         private ISaveLoad saveLoad;
 
+        /// <summary>
+        /// Tạo bộ đếm lượt theo ngày. Key chưa có trong save thì khởi tạo đầy lượt.
+        /// </summary>
+        /// <param name="saveLoadSystem">Hệ thống lưu dữ liệu của project (ISaveLoad).</param>
+        /// <param name="saveKeyRemaining">Key lưu số lượt còn lại. Phải khác saveKeyLastDepleted.</param>
+        /// <param name="saveKeyLastDepleted">Key lưu mốc reset gần nhất.</param>
+        /// <param name="maximumUse">Số lượt tối đa mỗi ngày.</param>
+        /// <param name="getCurrentTimeUTC">Hàm lấy giờ hiện tại UTC.</param>
         public UsageRegeneratorDaily(ISaveLoad saveLoadSystem, string saveKeyRemaining, string saveKeyLastDepleted, int maximumUse, Func<DateTime> getCurrentTimeUTC)
         {
             if (saveKeyLastDepleted == saveKeyRemaining)
@@ -36,6 +47,9 @@ namespace TuanTool
                 LastDepletedTime = GetPreviousResetTime();
         }
 
+        /// <summary>
+        /// Số lượt còn lại, đọc/ghi trực tiếp vào save. Setter lưu ngay.
+        /// </summary>
         public int RemainingUse
         {
             get => saveLoad.GetInt(saveKeyRemaining, MaximumUse);
@@ -45,6 +59,9 @@ namespace TuanTool
                 saveLoad.Save();
             }
         }
+        /// <summary>
+        /// Mốc reset gần nhất (UTC). Dùng để biết đã qua ngày mới hay chưa.
+        /// </summary>
         public DateTime LastDepletedTime
         {
             get
@@ -62,6 +79,9 @@ namespace TuanTool
             }
         }
 
+        /// <summary>
+        /// Nếu đã sang ngày UTC mới so với mốc reset gần nhất thì hồi đầy lượt và cập nhật mốc reset.
+        /// </summary>
         public void Refresh()
         {
             DateTime now = getCurrentTimeUTC.Invoke();
@@ -81,12 +101,18 @@ namespace TuanTool
         }
 
 
+        /// <summary>
+        /// Gọi Refresh() rồi trả về true nếu còn lượt.
+        /// </summary>
         public bool CanUse()
         {
             Refresh();
             return RemainingUse > 0;
         }
 
+        /// <summary>
+        /// Trừ 1 lượt nếu CanUse(). Hết lượt thì chờ đến 00:00 UTC hôm sau.
+        /// </summary>
         public void Use()
         {
             if (!CanUse())
@@ -102,12 +128,18 @@ namespace TuanTool
             }
         }
 
+        /// <summary>
+        /// Hồi đầy số lượt về <see cref="MaximumUse"/>.
+        /// </summary>
         public void ResetUses()
         {
             RemainingUse = MaximumUse;
             Debug.Log("Item đã hồi đầy.");
         }
 
+        /// <summary>
+        /// Thời gian còn lại đến 00:00 UTC tiếp theo, định dạng "HH:mm:ss". Trả về "00:00:00" nếu đã hồi.
+        /// </summary>
         public string GetCooldownTimeString()
         {
             TimeSpan remain = GetCooldownTimeSpan();
@@ -120,6 +152,9 @@ namespace TuanTool
                 remain.Seconds);
         }
 
+        /// <summary>
+        /// Khoảng thời gian còn lại đến lần reset tiếp theo (00:00 UTC).
+        /// </summary>
         public TimeSpan GetCooldownTimeSpan()
         {
             DateTime nextReset = GetNextResetTimeFrom(LastDepletedTime);
@@ -131,10 +166,7 @@ namespace TuanTool
         /// </summary>
         private DateTime GetNextResetTimeFrom(DateTime fromTime)
         {
-            DateTime candidate = fromTime.Date; // 00:00 UTC của ngày đó
-            if (fromTime >= candidate)
-                return candidate.AddDays(1); // nếu đã qua 00:00 thì reset vào ngày mai
-            return candidate;
+            return fromTime.Date.AddDays(1); // 00:00 UTC của ngày mai
         }
 
         /// <summary>

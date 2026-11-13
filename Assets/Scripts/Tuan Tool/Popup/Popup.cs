@@ -27,10 +27,15 @@ namespace TuanTool.Popup
             }
         }
 
+        [Tooltip("Đưa popup vào PopupManager để hiển thị lần lượt, không chồng lên nhau.")]
         public bool IsUseManager = true;
+        [Tooltip("Co content theo vùng an toàn (notch) của màn hình.")]
         public bool IsUseSafeArea = true;
+        [Tooltip("Ẩn content ngay khi Awake.")]
         public bool HideOnAwake = true;
+        [Tooltip("Tween không bị ảnh hưởng bởi Time.timeScale.")]
         public bool IgnoreScaleTime = true;
+        [Tooltip("Nền đen phía sau popup (có Image và CanvasGroup). Để trống nếu không cần.")]
         [OnValueChanged(nameof(onBGCHange))] public RectTransform blackScreen;
 
         private bool onBGCHange()
@@ -39,7 +44,9 @@ namespace TuanTool.Popup
             return true;
         }
 
+        [Tooltip("Phần nội dung chính của popup, sẽ được animate khi Show/Hide.")]
         [Required][OnValueChanged(nameof(oncontentCHange))] public RectTransform content;
+        [Tooltip("CanvasGroup của content và nền, tự lấy khi gán trong Inspector.")]
         [SerializeField] CanvasGroup canvasGroupContent, canvasGroupBG;
 
         private bool oncontentCHange()
@@ -48,6 +55,7 @@ namespace TuanTool.Popup
             return true;
         }
 
+        [Tooltip("X = alpha khi ẩn, Y = alpha khi hiện của content.")]
         [MinMaxSlider(0, 1f), SerializeField] Vector2 minMaxCanvasGroupContent = new Vector2(0, 1);
 
         [Tooltip("If true, BS will unactive when Show complete, else do nothing.")]
@@ -58,40 +66,40 @@ namespace TuanTool.Popup
         [BoxGroup("Black Screen")][LabelText("Color End Hide")][ShowIf("@blackScreen!=null")] public Color ColorBlackScreenEndHide = new Color(0, 0, 0, 0);
         [MinMaxSlider(0, 1f), SerializeField][BoxGroup("Black Screen")] Vector2 minMaxCanvasGroupBG = new Vector2(0, 0.7f);
 
+        [Tooltip("Thời gian animate khi mở popup (giây).")]
         public float durationOpen = 0.4f;
+        [Tooltip("Thời gian animate khi đóng popup (giây).")]
         public float durationClose = 0.4f;
 
 
-        //[GUIColor(0.8f, 1f, 0.8f)]
-        [BoxGroup("Use Scale")] public bool useScale = true;
+        [BoxGroup("Use Scale")][Tooltip("Bật hiệu ứng phóng to/thu nhỏ khi Show/Hide.")] public bool useScale = true;
 
-        [BoxGroup("Use Scale")][ShowIf("useScale")] public Vector3 startScale = Vector3.zero;
-        [BoxGroup("Use Scale")][ShowIf("useScale")] public Vector3 defaultScale = Vector3.one;
-        [BoxGroup("Use Scale")][ShowIf("useScale")] public Vector3 endScale = Vector3.one;
+        [BoxGroup("Use Scale")][ShowIf("useScale")][Tooltip("Scale lúc bắt đầu mở.")] public Vector3 startScale = Vector3.zero;
+        [BoxGroup("Use Scale")][ShowIf("useScale")][Tooltip("Scale khi popup đang hiển thị.")] public Vector3 defaultScale = Vector3.one;
+        [BoxGroup("Use Scale")][ShowIf("useScale")][Tooltip("Scale lúc kết thúc khi đóng.")] public Vector3 endScale = Vector3.one;
 
-        [BoxGroup("Use Scale")][ShowIf("useScale")] public Ease easeScaleOpen = Ease.OutBack;
-        [BoxGroup("Use Scale")][ShowIf("@useScale && this.easeScaleOpen == Ease.INTERNAL_Custom")] public AnimationCurve animCurverScaleOpen;
+        [BoxGroup("Use Scale")][ShowIf("useScale")][Tooltip("Easing khi mở popup.")] public Ease easeScaleOpen = Ease.OutBack;
+        [BoxGroup("Use Scale")][ShowIf("@useScale && this.easeScaleOpen == Ease.INTERNAL_Custom")][Tooltip("Đường cong easing tùy chỉnh khi mở.")] public AnimationCurve animCurverScaleOpen;
 
-        [BoxGroup("Use Scale")][ShowIf("useScale")] public Ease easeScaleClose = Ease.InBack;
-        [BoxGroup("Use Scale")][ShowIf("@useScale && this.easeScaleClose == Ease.INTERNAL_Custom")] public AnimationCurve animCurverScaleClose;
+        [BoxGroup("Use Scale")][ShowIf("useScale")][Tooltip("Easing khi đóng popup.")] public Ease easeScaleClose = Ease.InBack;
+        [BoxGroup("Use Scale")][ShowIf("@useScale && this.easeScaleClose == Ease.INTERNAL_Custom")][Tooltip("Đường cong easing tùy chỉnh khi đóng.")] public AnimationCurve animCurverScaleClose;
 
-        //[GUIColor(0.8f, 1f, 0.8f)]
-        [BoxGroup("Use Translation")] public bool useTranslation = false;
+        [BoxGroup("Use Translation")][Tooltip("Bật hiệu ứng trượt vị trí khi Show/Hide.")] public bool useTranslation = false;
 
-        [BoxGroup("Use Translation")][ShowIf("useTranslation")] public Vector3 startPos = new Vector3(-500, 0, 0);
-        [BoxGroup("Use Translation")][ShowIf("useTranslation")] public Vector3 defaultPos = new Vector3(0, 0, 0);
-        [BoxGroup("Use Translation")][ShowIf("useTranslation")] public Vector3 endPos = new Vector3(500, 0, 0);
+        [BoxGroup("Use Translation")][ShowIf("useTranslation")][Tooltip("Vị trí anchoredPosition lúc bắt đầu mở.")] public Vector3 startPos = new Vector3(-500, 0, 0);
+        [BoxGroup("Use Translation")][ShowIf("useTranslation")][Tooltip("Vị trí anchoredPosition khi đang hiển thị.")] public Vector3 defaultPos = new Vector3(0, 0, 0);
+        [BoxGroup("Use Translation")][ShowIf("useTranslation")][Tooltip("Vị trí anchoredPosition lúc kết thúc khi đóng.")] public Vector3 endPos = new Vector3(500, 0, 0);
 
-        [BoxGroup("Use Translation")][ShowIf("useTranslation")] public Ease easeTranslationOpen = Ease.OutBack;
-        [BoxGroup("Use Translation")][ShowIf("@useTranslation && easeTranslationOpen==Ease.INTERNAL_Custom")] public AnimationCurve curverTranslationOpen;
+        [BoxGroup("Use Translation")][ShowIf("useTranslation")][Tooltip("Easing khi mở popup.")] public Ease easeTranslationOpen = Ease.OutBack;
+        [BoxGroup("Use Translation")][ShowIf("@useTranslation && easeTranslationOpen==Ease.INTERNAL_Custom")][Tooltip("Đường cong easing tùy chỉnh khi mở.")] public AnimationCurve curverTranslationOpen;
 
-        [BoxGroup("Use Translation")][ShowIf("useTranslation")] public Ease easeTranslationClose = Ease.InBack;
-        [BoxGroup("Use Translation")][ShowIf("@useTranslation && easeTranslationClose==Ease.INTERNAL_Custom")] public AnimationCurve curverTranslationClose;
+        [BoxGroup("Use Translation")][ShowIf("useTranslation")][Tooltip("Easing khi đóng popup.")] public Ease easeTranslationClose = Ease.InBack;
+        [BoxGroup("Use Translation")][ShowIf("@useTranslation && easeTranslationClose==Ease.INTERNAL_Custom")][Tooltip("Đường cong easing tùy chỉnh khi đóng.")] public AnimationCurve curverTranslationClose;
 
-        [FoldoutGroup("Events")] public UnityEvent OnStartShow;
-        [FoldoutGroup("Events")] public UnityEvent OnCompleteShow;
-        [FoldoutGroup("Events")] public UnityEvent OnStartHide;
-        [FoldoutGroup("Events")] public UnityEvent OnCompleteHide;
+        [FoldoutGroup("Events")][Tooltip("Gọi khi bắt đầu Show.")] public UnityEvent OnStartShow;
+        [FoldoutGroup("Events")][Tooltip("Gọi khi Show xong.")] public UnityEvent OnCompleteShow;
+        [FoldoutGroup("Events")][Tooltip("Gọi khi bắt đầu Hide.")] public UnityEvent OnStartHide;
+        [FoldoutGroup("Events")][Tooltip("Gọi khi Hide xong.")] public UnityEvent OnCompleteHide;
 
         float initAlphaBlackScreen;
         Image imgBlackScreen;
@@ -101,12 +109,13 @@ namespace TuanTool.Popup
         protected virtual void Awake()
         {
             if (canvasGroupContent == null)
-                canvasGroupContent = content.GetComponent<CanvasGroup>();
+                canvasGroupContent = content?.GetComponent<CanvasGroup>();
             initName = gameObject.name;
             gameObject.SetActive(true);
             if (blackScreen != null)
                 blackScreen.gameObject.SetActive(false);
-            content.gameObject.SetActive(!HideOnAwake);
+            if (content != null)
+                content.gameObject.SetActive(!HideOnAwake);
             //gameObject.SetActive(false);
             if (blackScreen != null)
             {
@@ -150,6 +159,9 @@ namespace TuanTool.Popup
             //    name, r.x, r.y, r.width, r.height, Screen.width, Screen.height);
         }
         Tween tweenBGColor, tweenBGCanvasGroup, tweenCanvasGroupContent;
+        /// <summary>
+        /// Mở popup với hiệu ứng (fade, scale, translation theo cấu hình). Gọi onComplete khi hiệu ứng xong.
+        /// </summary>
         public virtual void Show(System.Action onComplete = null)
         {
 
@@ -166,8 +178,8 @@ namespace TuanTool.Popup
                 tweenBGColor = imgBlackScreen.DOColor(ColorBlackScreenEndShow, durationOpen).SetUpdate(IgnoreScaleTime);
             }
 
-            _showFadeIncanvasGroup(canvasGroupBG, tweenBGCanvasGroup, minMaxCanvasGroupBG, durationOpen, IgnoreScaleTime);
-            _showFadeIncanvasGroup(canvasGroupContent, tweenCanvasGroupContent, minMaxCanvasGroupContent, durationOpen, IgnoreScaleTime);
+            _showFadeIncanvasGroup(canvasGroupBG, ref tweenBGCanvasGroup, minMaxCanvasGroupBG, durationOpen, IgnoreScaleTime);
+            _showFadeIncanvasGroup(canvasGroupContent, ref tweenCanvasGroupContent, minMaxCanvasGroupContent, durationOpen, IgnoreScaleTime);
 
             if (!useTranslation && !useScale)
             {
@@ -235,7 +247,7 @@ namespace TuanTool.Popup
             }
             OnStartShow?.Invoke();
 
-            static void _showFadeIncanvasGroup(CanvasGroup canvasGroup, Tween tween, Vector2 minMax, float duration, bool ignoreTImeScale)
+            static void _showFadeIncanvasGroup(CanvasGroup canvasGroup, ref Tween tween, Vector2 minMax, float duration, bool ignoreTImeScale)
             {
                 if (canvasGroup != null)
                 {
@@ -246,11 +258,17 @@ namespace TuanTool.Popup
             }
         }
 
+        /// <summary>
+        /// Gọi khi popup đã hiện xong: fire OnCompleteShow rồi onComplete.
+        /// </summary>
         public virtual void CompleteShow()
         {
             CompleteShow(null);
         }
 
+        /// <summary>
+        /// Gọi khi popup đã hiện xong: tắt nền nếu AutoDisableBlackScreenInCompleteShow, fire event rồi onComplete.
+        /// </summary>
         public virtual void CompleteShow(System.Action onComplete = null)
         {
             if (AutoDisableBlackScreenInCompleteShow)
@@ -265,6 +283,9 @@ namespace TuanTool.Popup
 
         }
 
+        /// <summary>
+        /// Đóng popup với hiệu ứng ngược lại Show. Gọi onComplete khi hiệu ứng xong.
+        /// </summary>
         public virtual void Hide(System.Action onComplete = null)
         {
 
@@ -296,8 +317,8 @@ namespace TuanTool.Popup
 
             }
 
-            _hideFadeIncanvasGroup(canvasGroupBG, tweenBGCanvasGroup, minMaxCanvasGroupBG, durationClose, IgnoreScaleTime);
-            _hideFadeIncanvasGroup(canvasGroupContent, tweenCanvasGroupContent, minMaxCanvasGroupContent, durationClose, IgnoreScaleTime);
+            _hideFadeIncanvasGroup(canvasGroupBG, ref tweenBGCanvasGroup, minMaxCanvasGroupBG, durationClose, IgnoreScaleTime);
+            _hideFadeIncanvasGroup(canvasGroupContent, ref tweenCanvasGroupContent, minMaxCanvasGroupContent, durationClose, IgnoreScaleTime);
 
 
             if (!useScale && !useTranslation)
@@ -336,7 +357,7 @@ namespace TuanTool.Popup
             }
             OnStartHide?.Invoke();
 
-            static void _hideFadeIncanvasGroup(CanvasGroup canvasGroup, Tween tween, Vector2 minMax, float duration, bool ignoreTImeScale)
+            static void _hideFadeIncanvasGroup(CanvasGroup canvasGroup, ref Tween tween, Vector2 minMax, float duration, bool ignoreTImeScale)
             {
                 if (canvasGroup != null)
                 {
@@ -358,11 +379,17 @@ namespace TuanTool.Popup
             return tween;
         }
 
+        /// <summary>
+        /// Kết thúc việc ẩn: tắt content, gỡ khỏi PopupManager (nếu IsUseManager), fire event rồi onComplete.
+        /// </summary>
         public virtual void CompleteHide()
         {
             CompleteHide(null);
         }
 
+        /// <summary>
+        /// Kết thúc việc ẩn: tắt content, gỡ khỏi PopupManager (nếu IsUseManager), fire event rồi onComplete.
+        /// </summary>
         public virtual void CompleteHide(Action onComplete = null)
         {
             if (blackScreen != null)
@@ -381,6 +408,10 @@ namespace TuanTool.Popup
 
         }
 
+        /// <summary>
+        /// Yêu cầu hiện popup. Nếu IsUseManager thì xếp hàng qua PopupManager, không thì Show ngay.
+        /// Nút "Show" trong Inspector.
+        /// </summary>
         [PropertyOrder(-2)]
         [GUIColor(0.5f, 1f, 0.8f)]
 
@@ -417,6 +448,9 @@ namespace TuanTool.Popup
             }
 
         }
+        /// <summary>
+        /// Đóng popup ngay (dùng Hide với hiệu ứng). Nút "Hide" trong Inspector.
+        /// </summary>
         [PropertyOrder(-1)]
         [GUIColor(1f, 0.5f, 0.6f)]
         [ButtonGroup("top")]

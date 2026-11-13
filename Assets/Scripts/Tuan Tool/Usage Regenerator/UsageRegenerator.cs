@@ -1,12 +1,13 @@
 using System;
 using UnityEngine;
 
-namespace TuanTool.UsageRegenerator
+namespace TuanTool
 {
 
     /// <summary>
     /// sau khi dùng (Use()) đến số lần tối đa sẽ chạy thời gian để reset theo resetDuration
     /// chỉ chạy resetduration khi RemainingUse <= 0
+    /// <br>Yêu cầu: project phải tự cung cấp <see cref="ISaveLoad"/> (vd: wrap PlayerPrefs) truyền vào constructor.</br>
     /// </summary>
     [System.Serializable]
     public class UsageRegenerator
@@ -27,10 +28,20 @@ namespace TuanTool.UsageRegenerator
         /// </summary>
         private TimeSpan resetDuration;
 
+        /// <summary>Số lần dùng tối đa mỗi chu kỳ.</summary>
         public int MaximumUse { get; private set; }
         Func<DateTime> getCurrentTimeUTC = () => DateTime.UtcNow;
         ISaveLoad saveLoad;
 
+        /// <summary>
+        /// Tạo bộ đếm lượt dùng. Nếu key chưa có trong save thì khởi tạo đầy lượt và đặt mốc hết lượt lùi lại một chu kỳ.
+        /// </summary>
+        /// <param name="saveLoadSystem">Hệ thống lưu dữ liệu của project (ISaveLoad).</param>
+        /// <param name="saveKeyRemaining">Key lưu số lượt còn lại. Phải khác saveKeyLastDepleted.</param>
+        /// <param name="saveKeyLastDepleted">Key lưu thời điểm hết lượt (UTC).</param>
+        /// <param name="maximumUse">Số lượt tối đa.</param>
+        /// <param name="getCurrentTimeUTC">Hàm lấy giờ hiện tại UTC (nên dùng TimeSyncManager để chống chỉnh giờ).</param>
+        /// <param name="resetDuration">Thời gian hồi lượt, mặc định 24h.</param>
         public UsageRegenerator(ISaveLoad saveLoadSystem, string saveKeyRemaining, string saveKeyLastDepleted, int maximumUse, Func<DateTime> getCurrentTimeUTC, TimeSpan? resetDuration = null)
         {
             if (saveKeyLastDepleted == saveKeyRemaining)
@@ -50,6 +61,9 @@ namespace TuanTool.UsageRegenerator
                 LastDepletedTime = getCurrentTimeUTC.Invoke() - this.resetDuration;
         }
 
+        /// <summary>
+        /// Số lượt còn lại, đọc/ghi trực tiếp vào save. Setter lưu ngay.
+        /// </summary>
         public int RemainingUse
         {
             get => saveLoad.GetInt(saveKeyRemaining, MaximumUse);
@@ -60,6 +74,9 @@ namespace TuanTool.UsageRegenerator
             }
         }
 
+        /// <summary>
+        /// Thời điểm (UTC) hết lượt lần cuối, lưu dưới dạng FileTimeUtc. Dùng để tính thời gian hồi.
+        /// </summary>
         public DateTime LastDepletedTime
         {
             get
@@ -91,6 +108,9 @@ namespace TuanTool.UsageRegenerator
             }
         }
 
+        /// <summary>
+        /// Kiểm tra có dùng được không. Nếu đã hết chu kỳ hồi thì tự hồi đầy và trả về true.
+        /// </summary>
         public bool CanUse()
         {
             if (RemainingUse <= 0)
@@ -105,6 +125,9 @@ namespace TuanTool.UsageRegenerator
             return true;
         }
 
+        /// <summary>
+        /// Trừ 1 lượt nếu CanUse(). Khi hết lượt sẽ ghi lại thời điểm hết lượt để bắt đầu đếm hồi.
+        /// </summary>
         public void Use()
         {
             if (!CanUse())
@@ -121,12 +144,18 @@ namespace TuanTool.UsageRegenerator
             }
         }
 
+        /// <summary>
+        /// Hồi đầy số lượt về <see cref="MaximumUse"/>.
+        /// </summary>
         public void ResetUses()
         {
             RemainingUse = MaximumUse;
             Debug.Log("Item đã hồi đầy.");
         }
 
+        /// <summary>
+        /// Thời gian còn lại đến khi hồi, định dạng "HH:mm:ss". Trả về "00:00:00" nếu đã hồi xong.
+        /// </summary>
         public string GetCooldownTimeString()
         {
             TimeSpan remain = GetCooldownTimeSpan();
@@ -139,6 +168,9 @@ namespace TuanTool.UsageRegenerator
                 remain.Seconds);
         }
 
+        /// <summary>
+        /// Khoảng thời gian còn lại đến khi hồi (có thể âm nếu đã qua).
+        /// </summary>
         public TimeSpan GetCooldownTimeSpan()
         {
             DateTime readyTime = LastDepletedTime + resetDuration;

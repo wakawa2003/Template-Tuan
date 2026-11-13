@@ -1,5 +1,4 @@
 ﻿using Cysharp.Threading.Tasks;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -7,33 +6,14 @@ using UnityEngine;
 
 namespace TuanTool
 {
-    public class UnitaskExtension
+    /// <summary>
+    /// Tiện ích cho UniTask.
+    /// </summary>
+    public static class UnitaskExtension
     {
-        async void testTimingTasks()
-        {
-            var t1 = UniTask.Defer(async () =>
-            {
-                await UniTask.WaitForSeconds(1);
-                Debug.Log($"complete task1");
-            });
-            var t2 = UniTask.Defer(async () =>
-            {
-                await UniTask.WaitForSeconds(2);
-                Debug.Log($"complete task2");
-            });
-            var t3 = UniTask.Defer(async () =>
-            {
-                await UniTask.WaitForSeconds(6);
-                Debug.Log($"complete task3");
-            });
-
-            await UnitaskExtension.TimingTasks(default, (1, t1), (2, t2), (6, t3));
-            Debug.Log($"complete");
-        }
-
-
         /// <summary>
-        /// Ensure multyple tasks completed in same time.
+        /// Chạy nhiều task Defer để tất cả kết thúc cùng lúc.
+        /// Mỗi task bắt đầu sau (thời gian lớn nhất - thời gian của nó), nên task ngắn nhất sẽ chờ lâu nhất.
         /// Tasks need Defered.
         /// </summary>
         /// <param name="cancellationToken"></param>

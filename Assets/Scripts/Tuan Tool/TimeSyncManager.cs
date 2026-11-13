@@ -16,13 +16,14 @@ namespace TuanTool
     {
 
         [Header("Trạng thái đồng bộ")]
+        [Tooltip("Đã lấy được giờ từ server chưa. Nếu false, GetCurrentNetworkTime dùng giờ máy.")]
         [SerializeField] private bool _isTimeSynced = false;
 
         // Biến lưu trữ mốc thời gian
         private DateTime _baseInternetTime;
         private float _timeAtFetch;
 
-        // Danh sách các server "bất tử" phủ sóng toàn cầu
+        // Nhiều host để dự phòng: có server bị chặn ở một số vùng (VD: Google ở Trung Quốc), nên thử song song và lấy kết quả đầu tiên
         private readonly string[] timeServers = new string[]
         {
         "https://www.microsoft.com",     // Ổn định toàn cầu
@@ -99,8 +100,8 @@ namespace TuanTool
         }
 
         /// <summary>
-        /// Gọi hàm này để lấy giờ hiện tại. Game sẽ tự suy diễn thời gian mà KHÔNG tốn băng thông mạng.
-        /// Chống hack giờ 100%.
+        /// Lấy giờ hiện tại theo mốc internet đã đồng bộ, cộng thêm thời gian đã trôi qua (không gửi request mạng).
+        /// Nếu chưa đồng bộ được thì trả về giờ UTC của máy (có thể bị chỉnh sửa).
         /// </summary>
         public DateTime GetCurrentNetworkTime()
         {
@@ -120,6 +121,7 @@ namespace TuanTool
 
         /// <summary>
         /// Thuật toán Race Pattern: Bắn đồng loạt, lấy nhanh nhất, hủy phần còn lại.
+        /// Gọi khi mở game và mỗi lần app quay lại từ background (OnApplicationPause).
         /// </summary>
         public async Task SyncTimeWithInternetAsync()
         {
@@ -162,8 +164,11 @@ namespace TuanTool
         }
 
         /// <summary>
-        /// Xử lý từng Request độc lập (dùng lệnh HEAD siêu nhẹ)
+        /// Xử lý từng Request độc lập (dùng lệnh HEAD siêu nhẹ). Đọc header Date để lấy giờ server (GMT).
+        /// Trả về null nếu lỗi mạng, timeout, bị hủy hoặc không parse được header.
         /// </summary>
+        /// <param name="url">Địa chỉ server cần hỏi</param>
+        /// <param name="token">Token để hủy request khi đã có kết quả từ server khác</param>
         private async Task<DateTime?> FetchTimeFromServerAsync(string url, CancellationToken token)
         {
             using (UnityWebRequest webRequest = UnityWebRequest.Head(url))

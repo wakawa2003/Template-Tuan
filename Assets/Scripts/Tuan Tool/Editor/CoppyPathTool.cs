@@ -1,10 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
 namespace TuanTool
 {
+    /// <summary>
+    /// Thêm mục "Copy Path" vào menu chuột phải GameObject trong Hierarchy.
+    /// Copy đường dẫn đầy đủ của object (vd: "Canvas/Panel/Button") vào clipboard.
+    /// </summary>
     public static class CopyGameObjectPathFromHierarchy
     {
         [MenuItem("GameObject/Copy Path", false, 11)]

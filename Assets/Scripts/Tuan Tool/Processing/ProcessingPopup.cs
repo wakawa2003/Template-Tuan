@@ -5,16 +5,26 @@ using UnityEngine;
 
 namespace TuanTool.Processing
 {
+    /// <summary>
+    /// Popup loading xoay icon, tự hiện khi ProcessingController có tiến trình đang chạy và tự ẩn khi xong.
+    /// Tồn tại xuyên scene (DontDestroyOnLoad).
+    /// </summary>
     public class ProcessingPopup : Popup.Popup
     {
         private Tween rotateTween;
 
         [Header("Settings")]
+        [Tooltip("Thời gian (giây) để icon xoay đủ một vòng 360 độ.")]
         [SerializeField] private float rotationSpeed = 1f;
+        [Tooltip("Transform của icon cần xoay (thường là icon loading con của content).")]
         [SerializeField] private Transform iconTransform;
 
         #region Singleton
         private static ProcessingPopup ins;
+
+        /// <summary>
+        /// Instance dùng chung, tìm trong scene nếu chưa có.
+        /// </summary>
         public static ProcessingPopup Ins
         {
             get
@@ -67,6 +77,9 @@ namespace TuanTool.Processing
 
         }
 
+        /// <summary>
+        /// Hiện popup và bắt đầu xoay icon (vòng lặp vô hạn, không phụ thuộc timeScale).
+        /// </summary>
         public override void Show(Action onComplete = null)
         {
             base.Show(onComplete);

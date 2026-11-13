@@ -5,9 +5,15 @@ using UnityEngine.UI;
 
 namespace TuanTool
 {
+    /// <summary>
+    /// Button đồng bộ màu với text: khi đổi trạng thái (Normal/Highlighted/Pressed/...),
+    /// CanvasGroup chứa text sẽ fade theo độ sáng của màu tương ứng trong ColorBlock.
+    /// Yêu cầu Transition = ColorTint.
+    /// </summary>
     [RequireComponent(typeof(CanvasGroup))]
     public class ButtonSyncWithText : Button
     {
+        [Tooltip("CanvasGroup của text cần fade theo trạng thái button. Tự tìm trong con nếu để trống.")]
         public CanvasGroup m_CanvasGroup;
 
         protected override void DoStateTransition(SelectionState state, bool instant)
@@ -40,30 +46,29 @@ namespace TuanTool
                 if (m_CanvasGroup != null)
                 {
                     float a = tintColor.a * tintColor.r * tintColor.g * tintColor.b;
-                    m_CanvasGroup.DOFade(a, instant ? 0f : colors.fadeDuration).SetUpdate(true).KillOnDestroy(m_CanvasGroup.transform);
+                    // SetLink: tween tự kill khi CanvasGroup bị destroy (thay cho TweenExtension cũ)
+                    m_CanvasGroup.DOFade(a, instant ? 0f : colors.fadeDuration).SetUpdate(true).SetLink(m_CanvasGroup.gameObject);
                 }
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// Cập nhật alpha của CanvasGroup ngay trong Inspector khi đổi màu/interactable.
+        /// </summary>
         protected override void OnValidate()
         {
             base.OnValidate();
-            Color tintColor = colors.normalColor;
-            if (interactable)
-            {
-                if (m_CanvasGroup != null)
-                    tintColor = colors.normalColor;
-            }
-            else
-            {
-                if (m_CanvasGroup != null)
-                    tintColor = colors.disabledColor;
-            }
             if (m_CanvasGroup == null) m_CanvasGroup = GetComponentInChildren<CanvasGroup>();
+            if (m_CanvasGroup == null) return;
+
+            Color tintColor = interactable ? colors.normalColor : colors.disabledColor;
             float a = tintColor.a * tintColor.r * tintColor.g * tintColor.b;
             m_CanvasGroup.alpha = a * colors.colorMultiplier;
         }
 
+        /// <summary>
+        /// Khi thêm component lần đầu, tự gán CanvasGroup nằm trong con.
+        /// </summary>
         protected override void Reset()
         {
             base.Reset();

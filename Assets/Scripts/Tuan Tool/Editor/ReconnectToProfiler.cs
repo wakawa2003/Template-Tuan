@@ -1,11 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 namespace TuanTool
 {
-    public class ReconnectToProfiler : MonoBehaviour
+    /// <summary>
+    /// Menu Tools/Reconnect Profiler: chạy adb forward và adb reverse để Profiler kết nối lại
+    /// với app Android đang chạy (cổng 34999 trên máy, 34998 trên thiết bị). Chỉ hoạt động trên Windows (cmd.exe).
+    /// </summary>
+    public static class ReconnectToProfiler
     {
         [MenuItem("Tools/" + "Reconnect Profiler")]
         public static void ReconnectProfiler()

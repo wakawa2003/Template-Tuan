@@ -15,21 +15,29 @@ namespace TuanTool
     public class SwitchPages : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         [Title("Settings")]
+        [Tooltip("Thời gian (giây) chạy animation chuyển trang")]
         [SerializeField] private float animDuration = 0.4f;
+        [Tooltip("Kiểu easing của animation chuyển trang")]
         [SerializeField] private Ease animEase = Ease.OutQuint;
 
         [Title("Swipe")]
+        [Tooltip("Cho phép vuốt/kéo để chuyển trang")]
         [SerializeField] private bool enableSwipe = true;
         [Tooltip("Khoảng cách kéo tối thiểu (pixel) theo phương ngang để chuyển trang")]
         [SerializeField] private float swipeThreshold = 100f;
 
         [Title("Pages Setup")]
+        [Tooltip("Danh sách các trang (RectTransform), thứ tự tương ứng với index")]
         [SerializeField] private RectTransform[] pages;
+        [Tooltip("Các nút chuyển trang tương ứng từng trang; nút của trang hiện tại sẽ bị disable")]
         [SerializeField] private Selectable[] togglesButton;
 
+        [Tooltip("Trang đang hiển thị khi bắt đầu game")]
         [SerializeField] private int currentPageIndex = 0;
 
+        [Tooltip("Gọi khi bắt đầu chuyển sang trang mới (tham số: index trang mới)")]
         public UnityEvent<int> OnStartShowPage;
+        [Tooltip("Gọi khi animation chuyển trang xong (tham số: index trang mới)")]
         public UnityEvent<int> OnCOmpleteShowPage;
 
         Sequence sequenceMove;

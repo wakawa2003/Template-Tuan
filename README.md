@@ -1,1 +1,2 @@
 Include UITool - install by Git package https://github.com/wakawa2003/Template-Tuan.git?path=Assets/Plugins/TuanUITool
+Include Common Tool - install by Git package https://github.com/wakawa2003/Template-Tuan.git?path=Assets/Scripts/Tuan%20Tool

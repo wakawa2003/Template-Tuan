@@ -1,0 +1,11 @@
+{
+    "name": "com.doantuan.common",
+    "version": "1.0.0",
+    "displayName": "Tuan Common",
+    "description": "Scripts By Tuan Doan",
+    "unity": "2022.3",
+    "author": {
+        "name": "Doan Dac Tuan",
+        "url": "https://github.com/wakawa2003"
+    }
+}

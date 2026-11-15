@@ -127,6 +127,7 @@ namespace UITool.Popup
 
         }
 
+        public string CallRequestShow() => CallRequestShow();
         public string CallRequestShow(object payloadData)
         {
             return (this as IPopup).RequestShow(payloadData);

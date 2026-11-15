@@ -63,6 +63,9 @@ namespace UITool.Popup
             IsShowing = false;
         }
 
+
+        public void RequestShowFromButton() => CallRequestShow(null);
+
         public void HideFromButton()
         {
             Hide().Forget();
@@ -127,7 +130,6 @@ namespace UITool.Popup
 
         }
 
-        public string CallRequestShow() => CallRequestShow();
         public string CallRequestShow(object payloadData)
         {
             return (this as IPopup).RequestShow(payloadData);

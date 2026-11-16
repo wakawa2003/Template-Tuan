@@ -51,6 +51,7 @@
   <Project Path="Unity.InternalAPIEngineBridge.001.csproj" />
   <Project Path="Unity.Burst.Editor.csproj" />
   <Project Path="Assembly-CSharp-firstpass.csproj" />
+  <Project Path="Coffee.UIParticle.csproj" />
   <Project Path="Unity.2D.Common.Path.Editor.csproj" />
   <Project Path="Unity.2D.Common.Editor.csproj" />
   <Project Path="ScriptablePacker.csproj" />
@@ -79,6 +80,7 @@
   <Project Path="UniTask.TextMeshPro.csproj" />
   <Project Path="Unity.2D.Common.Runtime.csproj" />
   <Project Path="Unity.ScriptableBuildPipeline.csproj" />
+  <Project Path="Coffee.UIParticle.Editor.csproj" />
   <Project Path="Unity.ShaderGraph.Utilities.csproj" />
   <Project Path="R3.Unity.TextMeshPro.csproj" />
   <Project Path="TuanToolEditor.csproj" />
@@ -135,6 +137,7 @@
   <Project Path="UniTask.Linq.Player.csproj" />
   <Project Path="Unity.InternalAPIEngineBridge.001.Player.csproj" />
   <Project Path="Assembly-CSharp-firstpass.Player.csproj" />
+  <Project Path="Coffee.UIParticle.Player.csproj" />
   <Project Path="R3.Unity.Player.csproj" />
   <Project Path="Assembly-CSharp.Player.csproj" />
   <Project Path="Unity.Multiplayer.Center.Common.Player.csproj" />
